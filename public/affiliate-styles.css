@@ -1,0 +1,543 @@
+/* Shopee Affiliate Styles */
+
+/* Affiliate Banner */
+.affiliate-banner {
+    margin: var(--spacing-xl) auto;
+    max-width: 900px;
+    animation: slideUp 0.6s ease-out;
+}
+
+.affiliate-content {
+    background: linear-gradient(135deg, #EE4D2D 0%, #FF6B35 100%);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-lg);
+    box-shadow: 0 8px 32px rgba(238, 77, 45, 0.4);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.affiliate-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.affiliate-content:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(238, 77, 45, 0.5);
+}
+
+.affiliate-icon {
+    flex-shrink: 0;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.affiliate-text {
+    flex: 1;
+}
+
+.affiliate-text h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: var(--spacing-xs);
+    color: white;
+}
+
+.affiliate-text p {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+}
+
+.affiliate-btn {
+    background: white;
+    color: #EE4D2D;
+    padding: 1rem 2rem;
+    border-radius: var(--radius-lg);
+    font-weight: 700;
+    font-size: 1.125rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    transition: var(--transition);
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.affiliate-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Sticky Bottom Banner */
+.sticky-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(135deg, #EE4D2D 0%, #FF6B35 100%);
+    box-shadow: 0 -4px 20px rgba(238, 77, 45, 0.4);
+    z-index: 1000;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sticky-banner.show {
+    transform: translateY(0);
+}
+
+.sticky-banner-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+}
+
+.sticky-banner-text {
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.sticky-banner-btn {
+    background: white;
+    color: #EE4D2D;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    text-decoration: none;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.sticky-banner-btn:hover {
+    transform: scale(1.05);
+}
+
+.sticky-banner-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sticky-banner-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Affiliate Interstitial */
+.affiliate-interstitial {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.affiliate-interstitial-content {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+}
+
+.affiliate-interstitial-loader {
+    margin-bottom: var(--spacing-xl);
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto var(--spacing-md);
+}
+
+.affiliate-interstitial-loader p {
+    color: var(--text-secondary);
+    font-size: 1.125rem;
+}
+
+.affiliate-interstitial-ad {
+    padding: var(--spacing-lg);
+    background: linear-gradient(135deg, #EE4D2D 0%, #FF6B35 100%);
+    border-radius: var(--radius-lg);
+}
+
+.affiliate-interstitial-ad h3 {
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-sm);
+    color: white;
+}
+
+.affiliate-interstitial-ad p {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: var(--spacing-md);
+}
+
+.affiliate-interstitial-btn {
+    display: inline-block;
+    background: white;
+    color: #EE4D2D;
+    padding: 1rem 2rem;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.affiliate-interstitial-btn:hover {
+    transform: scale(1.05);
+}
+
+/* Success Modal */
+.success-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 2001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.success-modal.fade-out {
+    animation: fadeOut 0.3s ease-out;
+}
+
+.success-modal-content {
+    background: var(--bg-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    max-width: 450px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+    animation: slideUp 0.4s ease-out;
+}
+
+.success-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: var(--text-primary);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.success-modal-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.success-modal-icon {
+    font-size: 4rem;
+    margin-bottom: var(--spacing-md);
+    animation: bounce 0.6s ease-out;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+.success-modal-content h3 {
+    font-size: 1.75rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.success-modal-content>p {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-lg);
+}
+
+.success-modal-offer {
+    background: linear-gradient(135deg, #EE4D2D 0%, #FF6B35 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+}
+
+.offer-text {
+    color: white;
+    font-size: 1.125rem;
+    margin-bottom: var(--spacing-md);
+}
+
+.success-modal-btn {
+    display: inline-block;
+    background: white;
+    color: #EE4D2D;
+    padding: 1rem 2rem;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.success-modal-btn:hover {
+    transform: scale(1.05);
+}
+
+/* Footer Updates */
+.footer-note {
+    margin-top: var(--spacing-sm);
+    font-size: 0.875rem;
+}
+
+.footer-note a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.footer-note a:hover {
+    color: var(--secondary);
+}
+
+/* Responsive Updates */
+@media (max-width: 768px) {
+    .affiliate-content {
+        flex-direction: column;
+        text-align: center;
+        padding: var(--spacing-lg);
+    }
+
+    .affiliate-text h3 {
+        font-size: 1.25rem;
+    }
+
+    .affiliate-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .sticky-banner-content {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm);
+    }
+
+    .sticky-banner-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+/* Luxury Advertising Styles Extension */
+
+/* Careviona Luxury Nav Link */
+.nav-backlink {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-backlink::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: 0.5s;
+}
+
+.nav-backlink:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(200, 113, 255, 0.2);
+}
+
+.nav-backlink:hover::before {
+    left: 100%;
+}
+
+/* Floating Ads */
+.floating-ads {
+    position: fixed;
+    right: 2rem;
+    bottom: 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    z-index: 999;
+}
+
+.floating-circle {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: var(--transition);
+    animation: float-circles 4s infinite ease-in-out;
+}
+
+.floating-circle:hover {
+    transform: scale(1.1) rotate(5deg);
+    border-color: #EE4D2D;
+    box-shadow: 0 12px 32px rgba(238, 77, 45, 0.4);
+}
+
+@keyframes float-circles {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+.floating-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--transition);
+}
+
+.floating-circle::after {
+    content: 'DEAL';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #EE4D2D;
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 800;
+    text-align: center;
+    padding: 2px 0;
+    transform: translateY(100%);
+    transition: var(--transition);
+}
+
+.floating-circle:hover::after {
+    transform: translateY(0);
+}
+
+/* Premium Shopee Banner Glow */
+.affiliate-content {
+    border: 2px solid transparent;
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+}
+
+.affiliate-content:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 40px rgba(238, 77, 45, 0.6);
+}
+
+/* Responsive Ads */
+@media (max-width: 1024px) {
+    .floating-ads {
+        right: 1rem;
+        bottom: 8rem;
+    }
+
+    .floating-circle {
+        width: 65px;
+        height: 65px;
+    }
+}
