@@ -2,13 +2,14 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+
 const downloadRouter = require('./routes/download');
 const flipRouter = require('./routes/flip');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+// Middleware cơ bản
 app.use(cors({
   origin: process.env.FRONTEND_URL || '*',
   methods: ['GET', 'POST'],
@@ -17,25 +18,25 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Logging middleware
+// ✅ SERVE STATIC FILES – PHẢI ĐẶT TRƯỚC
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Logging (để sau static)
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
 
-// API Routes - MUST come before static files
+// API routes
 app.use('/api', downloadRouter);
 app.use('/api', flipRouter);
 
-// Serve static frontend files AFTER API routes
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Homepage route
+// Homepage (optional – static đã cover rồi)
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Error handling middleware
+// Error handler
 app.use((err, req, res, next) => {
   console.error('Error:', err.message);
   res.status(err.status || 500).json({
@@ -44,7 +45,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
+// 404 handler (sau cùng)
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -52,10 +53,6 @@ app.use((req, res) => {
   });
 });
 
-// Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🌐 Open http://localhost:${PORT} in your browser`);
-  console.log(`✅ API available at http://localhost:${PORT}/api/download`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
