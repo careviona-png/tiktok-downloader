@@ -1,8 +1,11 @@
-[phases.setup]
-nixPkgs = ["nodejs_20", "yt-dlp", "ffmpeg"]
+# Railway Nixpacks configuration
+# This file configures the build environment for Railway
 
-[phases.build]
-cmds = ["npm install"]
+[phases.setup]
+nixPkgs = ["nodejs_20", "ffmpeg-full"]
+
+[phases.install]
+cmds = ["npm ci || npm install"]
 
 [start]
 cmd = "node server.js"
