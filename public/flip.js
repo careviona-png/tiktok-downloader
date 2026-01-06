@@ -4,7 +4,7 @@
  */
 
 // Configuration
-const FLIP_API_URL = 'http://localhost:3000/api/flip';
+const FLIP_API_URL = '/api/flip';
 
 /**
  * Flip video horizontally (mirror effect)

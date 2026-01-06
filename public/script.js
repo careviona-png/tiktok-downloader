@@ -310,7 +310,7 @@ function downloadVideoProxy(type = 'video') {
     }
 
     // Use backend proxy
-    const proxyUrl = `http://localhost:3000/api/proxy-download?url=${encodeURIComponent(url)}${type === 'audio' ? '&type=audio' : ''}`;
+    const proxyUrl = `/api/proxy-download?url=${encodeURIComponent(url)}${type === 'audio' ? '&type=audio' : ''}`;
 
     // Create temporary link
     const a = document.createElement('a');
