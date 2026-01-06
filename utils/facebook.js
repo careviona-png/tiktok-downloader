@@ -1,196 +1,89 @@
-const axios = require('axios');
+const youtubedl = require('youtube-dl-exec');
 
 /**
- * Get Facebook video info using a working approach
- * Uses multiple API fallbacks
+ * Get Facebook video info using yt-dlp (youtube-dl-exec)
+ * This is the most reliable method for extracting video URLs
  */
 async function getFacebookVideo(url) {
     console.log('🔍 Fetching Facebook video:', url);
 
-    // Try multiple APIs
-    const apis = [
-        () => trygetvideoDownloader(url),
-        () => tryRapidAPI(url),
-        () => tryDirectScrape(url)
-    ];
-
-    for (const apiCall of apis) {
-        try {
-            const result = await apiCall();
-            if (result && (result.videoHD || result.videoSD)) {
-                return result;
-            }
-        } catch (error) {
-            console.log('API attempt failed:', error.message);
-        }
-    }
-
-    throw new Error('Could not download this video. Please try a different link or check if the video is public.');
-}
-
-/**
- * Try getvideo.app downloader
- */
-async function trygetvideoDownloader(url) {
-    console.log('📡 Trying getVideo API...');
-
     try {
-        const response = await axios({
-            method: 'POST',
-            url: 'https://getvideo.cc/api/ajaxSearch',
-            data: `q=${encodeURIComponent(url)}&vt=home`,
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Accept': 'application/json, text/javascript, */*; q=0.01',
-                'Origin': 'https://getvideo.cc',
-                'Referer': 'https://getvideo.cc/',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            timeout: 30000
+        // Use yt-dlp to extract video info
+        const output = await youtubedl(url, {
+            dumpSingleJson: true,
+            noCheckCertificates: true,
+            noWarnings: true,
+            preferFreeFormats: true,
+            addHeader: [
+                'referer:https://www.facebook.com/',
+                'user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            ]
         });
 
-        const data = response.data;
-        if (data.status === 'ok' && data.data) {
-            // Parse HTML in data.data to find links
-            const html = data.data;
-            const hdMatch = html.match(/href="([^"]+)"[^>]*>HD/i) || html.match(/data-url="([^"]+)"/);
-            const sdMatch = html.match(/href="([^"]+)"[^>]*>SD/i);
-            const videoMatch = html.match(/href="(https?:\/\/[^"]+(?:\.mp4|video)[^"]*)"/i);
+        console.log('✅ yt-dlp extraction successful!');
 
-            let hdUrl = hdMatch ? hdMatch[1] : '';
-            let sdUrl = sdMatch ? sdMatch[1] : '';
+        // Find best quality formats
+        let videoHD = '', videoSD = '';
 
-            if (!hdUrl && !sdUrl && videoMatch) {
-                sdUrl = videoMatch[1];
-            }
+        if (output.formats && output.formats.length > 0) {
+            // Sort by quality (height)
+            const videoFormats = output.formats
+                .filter(f => f.vcodec !== 'none' && f.ext === 'mp4')
+                .sort((a, b) => (b.height || 0) - (a.height || 0));
 
-            if (hdUrl || sdUrl) {
-                console.log('✅ getVideo API success!');
-                return createVideoData(hdUrl, sdUrl, data.title || 'Facebook Video');
+            if (videoFormats.length > 0) {
+                videoHD = videoFormats[0].url;
+                videoSD = videoFormats[videoFormats.length - 1].url || videoHD;
             }
         }
-    } catch (error) {
-        console.log('getVideo error:', error.message);
-    }
-    return null;
-}
 
-/**
- * Try RapidAPI Facebook downloader
- */
-async function tryRapidAPI(url) {
-    console.log('📡 Trying Rapid API...');
+        // Fallback to direct URL if available
+        if (!videoHD && output.url) {
+            videoHD = output.url;
+            videoSD = output.url;
+        }
 
-    // Note: This is a free tier endpoint, may have rate limits
-    try {
-        const response = await axios({
-            method: 'GET',
-            url: `https://facebook-video-downloader2.p.rapidapi.com/facebook?url=${encodeURIComponent(url)}`,
-            headers: {
-                'X-RapidAPI-Key': 'demo', // Would need real key for production
-                'X-RapidAPI-Host': 'facebook-video-downloader2.p.rapidapi.com'
+        if (!videoHD && !videoSD) {
+            throw new Error('No video URL found in extraction result');
+        }
+
+        return {
+            id: output.id || Date.now().toString(),
+            title: output.title || 'Facebook Video',
+            platform: 'facebook',
+            author: {
+                username: output.uploader || 'facebook_user',
+                nickname: output.uploader || 'Facebook User',
+                avatar: ''
             },
-            timeout: 15000
-        });
-
-        if (response.data && response.data.video_url) {
-            console.log('✅ Rapid API success!');
-            return createVideoData(response.data.hd_url || response.data.video_url, response.data.sd_url || response.data.video_url, response.data.title);
-        }
-    } catch (error) {
-        console.log('RapidAPI error:', error.message);
-    }
-    return null;
-}
-
-/**
- * Try direct page scraping (last resort)
- */
-async function tryDirectScrape(url) {
-    console.log('📡 Trying direct scrape...');
-
-    try {
-        // Try to get the mobile version which might have video URLs in source
-        let normalizedUrl = url.replace('www.facebook.com', 'm.facebook.com');
-
-        const response = await axios.get(normalizedUrl, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5'
-            },
-            timeout: 30000,
-            maxRedirects: 5
-        });
-
-        const html = response.data;
-
-        // Look for video URLs in the page
-        const videoPatterns = [
-            /"playable_url_quality_hd":"([^"]+)"/,
-            /"playable_url":"([^"]+)"/,
-            /"hd_src":"([^"]+)"/,
-            /"sd_src":"([^"]+)"/,
-            /data-store="([^"]*video_url[^"]*)"/,
-            /src="(https?:\/\/video[^"]+\.mp4[^"]*)"/
-        ];
-
-        let hdUrl = '', sdUrl = '';
-
-        for (const pattern of videoPatterns) {
-            const match = html.match(pattern);
-            if (match) {
-                let videoUrl = match[1].replace(/\\/g, '').replace(/\\u0025/g, '%');
-                // Decode unicode if needed
-                try {
-                    videoUrl = decodeURIComponent(videoUrl);
-                } catch (e) { }
-
-                if (!hdUrl) hdUrl = videoUrl;
-                else if (!sdUrl) sdUrl = videoUrl;
-
-                if (hdUrl && sdUrl) break;
+            thumbnail: output.thumbnail || '',
+            duration: output.duration || 0,
+            videoUrl: videoSD || videoHD,
+            videoNoWatermark: videoHD || videoSD,
+            videoHD: videoHD,
+            videoSD: videoSD,
+            audioUrl: '',
+            stats: {
+                plays: output.view_count || 0,
+                likes: output.like_count || 0,
+                comments: output.comment_count || 0,
+                shares: 0
             }
-        }
+        };
 
-        if (hdUrl || sdUrl) {
-            console.log('✅ Direct scrape success!');
-            return createVideoData(hdUrl, sdUrl, 'Facebook Video');
-        }
     } catch (error) {
-        console.log('Direct scrape error:', error.message);
-    }
-    return null;
-}
+        console.error('❌ yt-dlp Error:', error.message);
 
-/**
- * Create standardized video data object
- */
-function createVideoData(hdUrl, sdUrl, title = 'Facebook Video') {
-    return {
-        id: Date.now().toString(),
-        title: title,
-        platform: 'facebook',
-        author: {
-            username: 'facebook_user',
-            nickname: 'Facebook User',
-            avatar: ''
-        },
-        thumbnail: '',
-        duration: 0,
-        videoUrl: sdUrl || hdUrl,
-        videoNoWatermark: hdUrl || sdUrl,
-        videoHD: hdUrl,
-        videoSD: sdUrl,
-        audioUrl: '',
-        stats: {
-            plays: 0,
-            likes: 0,
-            comments: 0,
-            shares: 0
+        // Provide helpful error message
+        if (error.message.includes('Private video') || error.message.includes('login')) {
+            throw new Error('This video is private. Please make sure the video is public.');
         }
-    };
+        if (error.message.includes('not supported') || error.message.includes('Unsupported URL')) {
+            throw new Error('This URL is not supported. Please use a valid Facebook video link.');
+        }
+
+        throw new Error(`Could not download this video: ${error.message}`);
+    }
 }
 
 module.exports = {
