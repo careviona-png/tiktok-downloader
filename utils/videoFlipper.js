@@ -76,20 +76,30 @@ async function flipVideo(inputPath) {
     const outputPath = path.join(TEMP_DIR, `flipped-${Date.now()}.mp4`);
 
     try {
-        // Check if ffmpeg is installed (try global first, then local)
+        // Check if ffmpeg is installed - works on both Linux and Windows
         let ffmpegCmd = 'ffmpeg';
         try {
             await execPromise('ffmpeg -version');
+            console.log('✅ ffmpeg found in PATH');
         } catch (err) {
-            // Check if ffmpeg.exe exists in backend folder
-            const localFfmpeg = path.join(__dirname, '../ffmpeg.exe');
+            // Check for local ffmpeg binary (Windows or Linux)
+            const isWindows = process.platform === 'win32';
+            const localFfmpeg = path.join(__dirname, isWindows ? '../ffmpeg.exe' : '../ffmpeg');
+
             if (fs.existsSync(localFfmpeg)) {
                 ffmpegCmd = `"${localFfmpeg}"`;
                 console.log('📂 Using local ffmpeg from:', localFfmpeg);
             } else {
-                throw new Error('ffmpeg is not installed. Please install ffmpeg or copy ffmpeg.exe to backend folder.');
+                // On Linux, ffmpeg might be in /usr/bin or nixpacks location
+                try {
+                    await execPromise('which ffmpeg');
+                    console.log('✅ ffmpeg found via which command');
+                } catch (whichErr) {
+                    throw new Error('ffmpeg is not installed. On Railway, make sure nixpacks.toml includes ffmpeg.');
+                }
             }
         }
+
 
         // Flip video horizontally with high quality
         const command = `${ffmpegCmd} -i "${inputPath}" -vf "hflip" -c:v libx264 -crf 18 -preset fast -c:a copy "${outputPath}"`;
@@ -119,18 +129,29 @@ async function extractAudio(inputPath) {
     const outputPath = path.join(TEMP_DIR, `audio-${Date.now()}.mp3`);
 
     try {
-        // Check if ffmpeg is installed (try global first, then local)
+        // Check if ffmpeg is installed - works on both Linux and Windows
         let ffmpegCmd = 'ffmpeg';
         try {
             await execPromise('ffmpeg -version');
+            console.log('✅ ffmpeg found in PATH');
         } catch (err) {
-            const localFfmpeg = path.join(__dirname, '../ffmpeg.exe');
+            // Check for local ffmpeg binary (Windows or Linux)
+            const isWindows = process.platform === 'win32';
+            const localFfmpeg = path.join(__dirname, isWindows ? '../ffmpeg.exe' : '../ffmpeg');
+
             if (fs.existsSync(localFfmpeg)) {
                 ffmpegCmd = `"${localFfmpeg}"`;
             } else {
-                throw new Error('ffmpeg is not installed. Please install ffmpeg or copy ffmpeg.exe to backend folder.');
+                // On Linux, ffmpeg might be in /usr/bin or nixpacks location
+                try {
+                    await execPromise('which ffmpeg');
+                    console.log('✅ ffmpeg found via which command');
+                } catch (whichErr) {
+                    throw new Error('ffmpeg is not installed. On Railway, make sure nixpacks.toml includes ffmpeg.');
+                }
             }
         }
+
 
         // Extract audio with high quality
         const command = `${ffmpegCmd} -i "${inputPath}" -vn -acodec libmp3lame -q:a 2 "${outputPath}"`;
