@@ -2,21 +2,15 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-
 const downloadRouter = require('./routes/download');
 const flipRouter = require('./routes/flip');
+const facebookRouter = require('./routes/facebook');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-/* =========================
-   TRUST PROXY (RAILWAY)
-========================= */
-app.set('trust proxy', true);
 
-/* =========================
-   BASIC MIDDLEWARES
-========================= */
+// Middleware
 app.use(cors({
   origin: process.env.FRONTEND_URL || '*',
   methods: ['GET', 'POST'],
@@ -25,52 +19,27 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* =========================
-   REDIRECT non-www → www
-   (HTTP non-www sẽ redirect được)
-========================= */
-app.use((req, res, next) => {
-  const host = req.headers.host;
-
-  if (host === 'tikdown.top') {
-    return res.redirect(
-      301,
-      'https://www.tikdown.top' + req.originalUrl
-    );
-  }
-
-  next();
-});
-
-/* =========================
-   SERVE STATIC FILES
-========================= */
-app.use(express.static(path.join(__dirname, 'public')));
-
-/* =========================
-   LOGGING
-========================= */
+// Logging middleware
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
 
-/* =========================
-   API ROUTES
-========================= */
+// API Routes - MUST come before static files
 app.use('/api', downloadRouter);
 app.use('/api', flipRouter);
+app.use('/api/facebook', facebookRouter);
 
-/* =========================
-   HOMEPAGE (OPTIONAL)
-========================= */
+
+// Serve static frontend files AFTER API routes
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Homepage route
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-/* =========================
-   ERROR HANDLER
-========================= */
+// Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err.message);
   res.status(err.status || 500).json({
@@ -79,9 +48,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-/* =========================
-   404 HANDLER
-========================= */
+// 404 handler
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -89,9 +56,10 @@ app.use((req, res) => {
   });
 });
 
-/* =========================
-   START SERVER
-========================= */
+// Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🌐 Open http://localhost:${PORT} in your browser`);
+  console.log(`✅ API available at http://localhost:${PORT}/api/download`);
 });

@@ -1,16 +1,84 @@
 // Configuration
 const API_URL = '/api/download';
+const FACEBOOK_API_URL = '/api/facebook/download';
 
 // DOM Elements
 const downloadForm = document.getElementById('downloadForm');
 const videoUrlInput = document.getElementById('videoUrl');
 const downloadBtn = downloadForm.querySelector('.download-btn');
+const pasteBtn = document.getElementById('pasteBtn');
+const darkModeToggle = document.getElementById('darkModeToggle');
 
 // State
 let currentVideoData = null;
 
+// Initialize Dark Mode from localStorage
+function initDarkMode() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateDarkModeIcon(savedTheme);
+}
+
+function updateDarkModeIcon(theme) {
+    const sunIcon = darkModeToggle?.querySelector('.sun-icon');
+    const moonIcon = darkModeToggle?.querySelector('.moon-icon');
+    if (sunIcon && moonIcon) {
+        if (theme === 'dark') {
+            sunIcon.style.display = 'none';
+            moonIcon.style.display = 'block';
+        } else {
+            sunIcon.style.display = 'block';
+            moonIcon.style.display = 'none';
+        }
+    }
+}
+
+// Dark Mode Toggle Handler
+if (darkModeToggle) {
+    darkModeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateDarkModeIcon(newTheme);
+    });
+}
+
+// Paste Button Handler
+if (pasteBtn) {
+    pasteBtn.addEventListener('click', async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            videoUrlInput.value = text;
+            videoUrlInput.focus();
+            showMessage('✅ Đã dán link từ clipboard', 'success');
+        } catch (err) {
+            showMessage('❌ Không thể truy cập clipboard. Vui lòng dán thủ công.', 'error');
+        }
+    });
+}
+
+// Initialize dark mode on page load
+initDarkMode();
+
 // Event Listeners
 downloadForm.addEventListener('submit', handleDownload);
+
+/**
+ * Detect platform from URL
+ */
+function detectPlatform(url) {
+    if (/tiktok\.com/i.test(url)) return 'tiktok';
+    if (/facebook\.com|fb\.watch|fb\.com|fbwat\.ch/i.test(url)) return 'facebook';
+    return null;
+}
+
+/**
+ * Validate URL (TikTok or Facebook)
+ */
+function isValidUrl(url) {
+    return detectPlatform(url) !== null;
+}
 
 /**
  * Handle download form submission
@@ -21,15 +89,17 @@ async function handleDownload(e) {
     const url = videoUrlInput.value.trim();
 
     if (!url) {
-        showMessage('Vui lòng nhập link TikTok', 'error');
+        showMessage('Vui lòng nhập link video', 'error');
         return;
     }
 
-    // Validate TikTok URL
-    if (!isValidTikTokUrl(url)) {
-        showMessage('Link TikTok không hợp lệ. Vui lòng kiểm tra lại.', 'error');
+    const platform = detectPlatform(url);
+
+    if (!platform) {
+        showMessage('Link không hợp lệ. Hỗ trợ TikTok và Facebook.', 'error');
         return;
     }
+
 
     // Clear previous messages and preview
     clearMessages();
@@ -42,7 +112,11 @@ async function handleDownload(e) {
     const interstitial = showAffiliateInterstitial();
 
     try {
-        const response = await fetch(API_URL, {
+        // Use correct API based on platform
+        const apiUrl = platform === 'facebook' ? FACEBOOK_API_URL : API_URL;
+        console.log(`📡 Calling ${platform} API:`, apiUrl);
+
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -55,6 +129,7 @@ async function handleDownload(e) {
         if (!response.ok || !data.success) {
             throw new Error(data.error || 'Không thể tải video');
         }
+
 
         // Store video data
         currentVideoData = data.data;
@@ -102,25 +177,41 @@ function showVideoPreview(data) {
     // Remove existing preview
     clearPreview();
 
-    const preview = document.createElement('div');
-    preview.className = 'video-preview fade-in';
-    preview.innerHTML = `
-        <div class="video-info">
-            ${data.thumbnail ? `<img src="${data.thumbnail}" alt="Video thumbnail" class="video-thumbnail">` : ''}
-            <div class="video-details">
-                <h3 class="video-title">${escapeHtml(data.title)}</h3>
-                <p class="video-author">@${escapeHtml(data.author.username)} • ${escapeHtml(data.author.nickname)}</p>
-                ${data.stats ? `
-                    <div class="video-stats">
-                        <span>❤️ ${formatNumber(data.stats.likes)}</span>
-                        <span>💬 ${formatNumber(data.stats.comments)}</span>
-                        <span>🔄 ${formatNumber(data.stats.shares)}</span>
-                        <span>▶️ ${formatNumber(data.stats.plays)}</span>
-                    </div>
-                ` : ''}
-            </div>
-        </div>
-        <div class="download-actions">
+    const isFacebook = data.platform === 'facebook';
+    const platformLabel = isFacebook ? 'Facebook' : 'TikTok';
+    const platformIcon = isFacebook ? '📘' : '🎵';
+
+    // Build download buttons based on platform
+    let downloadButtons = '';
+
+    if (isFacebook) {
+        // Facebook: Show HD and SD options
+        const hdUrl = data.videoHD || data.videoNoWatermark || data.videoUrl;
+        const sdUrl = data.videoSD || data.videoUrl;
+
+        downloadButtons = `
+            ${hdUrl ? `
+            <button onclick="downloadVideoDirect('${encodeURIComponent(hdUrl)}', 'video')" class="download-video-btn" style="background: linear-gradient(135deg, #1877F2 0%, #42A5F5 100%);">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M10 13L5 8H8V2H12V8H15L10 13Z" fill="currentColor"/>
+                    <path d="M2 16H18V18H2V16Z" fill="currentColor"/>
+                </svg>
+                📘 Tải HD (Chất lượng cao)
+            </button>
+            ` : ''}
+            ${sdUrl ? `
+            <button onclick="downloadVideoDirect('${encodeURIComponent(sdUrl)}', 'video')" class="download-video-btn" style="background: linear-gradient(135deg, #4267B2 0%, #898F9C 100%);">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M10 13L5 8H8V2H12V8H15L10 13Z" fill="currentColor"/>
+                    <path d="M2 16H18V18H2V16Z" fill="currentColor"/>
+                </svg>
+                📘 Tải SD (Nhẹ hơn)
+            </button>
+            ` : ''}
+        `;
+    } else {
+        // TikTok: Original buttons
+        downloadButtons = `
             <button onclick="downloadVideoDirect('${encodeURIComponent(data.videoNoWatermark || data.videoUrl)}', 'video')" class="download-video-btn">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path d="M10 13L5 8H8V2H12V8H15L10 13Z" fill="currentColor"/>
@@ -143,12 +234,37 @@ function showVideoPreview(data) {
                 </svg>
                 🔄 Đảo Ngang (Reup)
             </button>
+        `;
+    }
+
+    const preview = document.createElement('div');
+    preview.className = 'video-preview fade-in';
+    preview.innerHTML = `
+        <div class="video-info">
+            ${data.thumbnail ? `<img src="${data.thumbnail}" alt="Video thumbnail" class="video-thumbnail">` : ''}
+            <div class="video-details">
+                <span class="platform-badge">${platformIcon} ${platformLabel}</span>
+                <h3 class="video-title">${escapeHtml(data.title)}</h3>
+                <p class="video-author">@${escapeHtml(data.author.username)} • ${escapeHtml(data.author.nickname)}</p>
+                ${data.stats && (data.stats.likes || data.stats.plays) ? `
+                    <div class="video-stats">
+                        <span>❤️ ${formatNumber(data.stats.likes)}</span>
+                        <span>💬 ${formatNumber(data.stats.comments)}</span>
+                        <span>🔄 ${formatNumber(data.stats.shares)}</span>
+                        <span>▶️ ${formatNumber(data.stats.plays)}</span>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+        <div class="download-actions">
+            ${downloadButtons}
         </div>
     `;
 
     const downloadCard = document.querySelector('.download-card');
     downloadCard.appendChild(preview);
 }
+
 
 /**
  * Download video
