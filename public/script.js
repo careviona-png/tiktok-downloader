@@ -11,6 +11,57 @@ const darkModeToggle = document.getElementById('darkModeToggle');
 
 // State
 let currentVideoData = null;
+let currentLang = localStorage.getItem('lang') || (navigator.language.startsWith('vi') ? 'vi' : 'en');
+
+/**
+ * i18n Logic: Update all elements with data-i18n attribute
+ */
+function updateUI() {
+    const langData = window.translations[currentLang];
+    if (!langData) return;
+
+    // Update text content
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (langData[key]) {
+            el.textContent = langData[key];
+        }
+    });
+
+    // Update attributes (placeholders, titles, etc.)
+    document.querySelectorAll('[data-i18n-attr]').forEach(el => {
+        const attrName = el.getAttribute('data-i18n-attr');
+        const key = el.getAttribute('data-i18n-key') || el.getAttribute('data-i18n');
+        if (langData[key]) {
+            el.setAttribute(attrName, langData[key]);
+        }
+    });
+
+    // Update current lang display
+    const currentLangDisplay = document.getElementById('currentLang');
+    if (currentLangDisplay) {
+        currentLangDisplay.textContent = currentLang.toUpperCase();
+    }
+
+    // Update document title and meta description
+    if (langData['title']) document.title = langData['title'];
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc && langData['description']) {
+        metaDesc.setAttribute('content', langData['description']);
+    }
+
+    console.log(`🌍 UI updated to: ${currentLang}`);
+}
+
+/**
+ * Switch language function (exposed to window)
+ */
+window.changeLanguage = function (lang) {
+    if (!window.translations[lang]) return;
+    currentLang = lang;
+    localStorage.setItem('lang', lang);
+    updateUI();
+};
 
 // Initialize Dark Mode from localStorage
 function initDarkMode() {
@@ -51,15 +102,20 @@ if (pasteBtn) {
             const text = await navigator.clipboard.readText();
             videoUrlInput.value = text;
             videoUrlInput.focus();
-            showMessage('✅ Đã dán link từ clipboard', 'success');
+            const successMsg = currentLang === 'vi' ? '✅ Đã dán link từ clipboard' : '✅ Pasted link from clipboard';
+            showMessage(successMsg, 'success');
         } catch (err) {
-            showMessage('❌ Không thể truy cập clipboard. Vui lòng dán thủ công.', 'error');
+            const errMsg = currentLang === 'vi' ? '❌ Không thể truy cập clipboard. Vui lòng dán thủ công.' : '❌ Cannot access clipboard. Please paste manually.';
+            showMessage(errMsg, 'error');
         }
     });
 }
 
-// Initialize dark mode on page load
+// Initialize on page load
 initDarkMode();
+document.addEventListener('DOMContentLoaded', () => {
+    updateUI(); // First UI update
+});
 
 // Event Listeners
 downloadForm.addEventListener('submit', handleDownload);
@@ -87,16 +143,17 @@ async function handleDownload(e) {
     e.preventDefault();
 
     const url = videoUrlInput.value.trim();
+    const langData = window.translations[currentLang];
 
     if (!url) {
-        showMessage('Vui lòng nhập link video', 'error');
+        showMessage(langData['error_no_url'], 'error');
         return;
     }
 
     const platform = detectPlatform(url);
 
     if (!platform) {
-        showMessage('Link không hợp lệ. Hỗ trợ TikTok và Facebook.', 'error');
+        showMessage(langData['error_invalid_url'], 'error');
         return;
     }
 
@@ -127,7 +184,8 @@ async function handleDownload(e) {
         const data = await response.json();
 
         if (!response.ok || !data.success) {
-            throw new Error(data.error || 'Không thể tải video');
+            const errorMsg = currentLang === 'vi' ? (data.error || 'Không thể tải video') : (data.error || 'Cannot download video');
+            throw new Error(errorMsg);
         }
 
 
@@ -139,9 +197,9 @@ async function handleDownload(e) {
 
         // Show success message
         if (data.cached) {
-            showMessage('✨ Đã tìm thấy video (từ cache)', 'success');
+            showMessage(langData['success_cached'], 'success');
         } else {
-            showMessage('✅ Tìm thấy video! Click nút bên dưới để tải xuống.', 'success');
+            showMessage(langData['success_found'], 'success');
         }
 
         // Remove interstitial
@@ -151,7 +209,8 @@ async function handleDownload(e) {
 
     } catch (error) {
         console.error('Download error:', error);
-        showMessage(error.message || 'Có lỗi xảy ra. Vui lòng thử lại.', 'error');
+        const errorMsg = error.message || (currentLang === 'vi' ? 'Có lỗi xảy ra. Vui lòng thử lại.' : 'An error occurred. Please try again.');
+        showMessage(errorMsg, 'error');
 
         // Remove interstitial on error
         if (interstitial && interstitial.parentNode) {
@@ -181,6 +240,8 @@ function showVideoPreview(data) {
     const platformLabel = isFacebook ? 'Facebook' : 'TikTok';
     const platformIcon = isFacebook ? '📘' : '🎵';
 
+    const langData = window.translations[currentLang];
+
     // Build download buttons based on platform
     let downloadButtons = '';
 
@@ -196,7 +257,7 @@ function showVideoPreview(data) {
                     <path d="M10 13L5 8H8V2H12V8H15L10 13Z" fill="currentColor"/>
                     <path d="M2 16H18V18H2V16Z" fill="currentColor"/>
                 </svg>
-                📘 Tải HD (Chất lượng cao)
+                ${langData['download_hd']}
             </button>
             ` : ''}
             ${sdUrl ? `
@@ -205,7 +266,7 @@ function showVideoPreview(data) {
                     <path d="M10 13L5 8H8V2H12V8H15L10 13Z" fill="currentColor"/>
                     <path d="M2 16H18V18H2V16Z" fill="currentColor"/>
                 </svg>
-                📘 Tải SD (Nhẹ hơn)
+                ${langData['download_sd']}
             </button>
             ` : ''}
         `;
@@ -217,13 +278,13 @@ function showVideoPreview(data) {
                     <path d="M10 13L5 8H8V2H12V8H15L10 13Z" fill="currentColor"/>
                     <path d="M2 16H18V18H2V16Z" fill="currentColor"/>
                 </svg>
-                Tải Video (Không Logo)
+                ${langData['download_no_logo']}
             </button>
             <button onclick="downloadVideoDirect('${encodeURIComponent(data.videoNoWatermark || data.videoUrl)}', 'audio')" class="download-video-btn" style="background: var(--gradient-secondary);">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path d="M8 5L13 10L8 15V5Z" fill="currentColor"/>
                 </svg>
-                Tải Audio
+                ${langData['download_audio']}
             </button>
             <button onclick="flipVideo('${data.videoNoWatermark || data.videoUrl}')" class="download-video-btn" style="background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -232,7 +293,7 @@ function showVideoPreview(data) {
                     <path d="M6 6L8 10L6 14" stroke="currentColor" stroke-width="2" fill="none"/>
                     <path d="M14 6L12 10L14 14" stroke="currentColor" stroke-width="2" fill="none"/>
                 </svg>
-                🔄 Đảo Ngang (Reup)
+                ${langData['flip_reup']}
             </button>
         `;
     }
@@ -271,7 +332,8 @@ function showVideoPreview(data) {
  */
 function downloadVideo(url, type = 'video') {
     if (!url) {
-        showMessage('Không tìm thấy link tải. Vui lòng thử lại.', 'error');
+        const errMsg = currentLang === 'vi' ? 'Không tìm thấy link tải. Vui lòng thử lại.' : 'Download link not found. Please try again.';
+        showMessage(errMsg, 'error');
         return;
     }
 
@@ -285,7 +347,8 @@ function downloadVideo(url, type = 'video') {
     a.click();
     document.body.removeChild(a);
 
-    showMessage('🎉 Đang tải xuống...', 'success');
+    const successMsg = currentLang === 'vi' ? '🎉 Đang tải xuống...' : '🎉 Downloading...';
+    showMessage(successMsg, 'success');
 
     // Show success modal after a short delay
     setTimeout(() => {
@@ -298,14 +361,16 @@ function downloadVideo(url, type = 'video') {
  */
 function downloadVideoProxy(type = 'video') {
     if (!currentVideoData) {
-        showMessage('Không tìm thấy thông tin video. Vui lòng thử lại.', 'error');
+        const errMsg = currentLang === 'vi' ? 'Không tìm thấy thông tin video. Vui lòng thử lại.' : 'Video info not found. Please try again.';
+        showMessage(errMsg, 'error');
         return;
     }
 
     const url = type === 'audio' ? currentVideoData.audioUrl : currentVideoData.videoNoWatermark || currentVideoData.videoUrl;
 
     if (!url) {
-        showMessage('Không tìm thấy link tải. Vui lòng thử lại.', 'error');
+        const errMsg = currentLang === 'vi' ? 'Không tìm thấy link tải. Vui lòng thử lại.' : 'Download link not found. Please try again.';
+        showMessage(errMsg, 'error');
         return;
     }
 
@@ -320,7 +385,8 @@ function downloadVideoProxy(type = 'video') {
     a.click();
     document.body.removeChild(a);
 
-    showMessage('🎉 Đang tải xuống...', 'success');
+    const successMsg = currentLang === 'vi' ? '🎉 Đang tải xuống...' : '🎉 Downloading...';
+    showMessage(successMsg, 'success');
 
     // Show success modal after a short delay
     setTimeout(() => {
@@ -334,7 +400,8 @@ function downloadVideoProxy(type = 'video') {
  */
 async function downloadVideoDirect(encodedUrl, type = 'video') {
     if (!encodedUrl) {
-        showMessage('Không tìm thấy link tải. Vui lòng thử lại.', 'error');
+        const errMsg = currentLang === 'vi' ? 'Không tìm thấy link tải. Vui lòng thử lại.' : 'Download link not found. Please try again.';
+        showMessage(errMsg, 'error');
         return;
     }
 
@@ -342,42 +409,8 @@ async function downloadVideoDirect(encodedUrl, type = 'video') {
     const url = decodeURIComponent(encodedUrl);
 
     if (type === 'audio') {
-        console.log('🎵 Extracting audio on server...');
-        showMessage('🎵 Đang trích xuất nhạc từ video... Vui lòng chờ.', 'info');
-
-        try {
-            const response = await fetch('/api/convert-mp3', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ videoUrl: url })
-            });
-
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.error || 'Lỗi trích xuất audio');
-            }
-
-            // Get the blob and download it
-            const blob = await response.blob();
-            const downloadUrl = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = `tiktok-audio-${Date.now()}.mp3`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(downloadUrl);
-
-            showMessage('✅ Tải nhạc thành công!', 'success');
-            showSuccessModal();
-            return;
-        } catch (error) {
-            console.error('Audio conversion error:', error);
-            showMessage('❌ Lỗi trích xuất nhạc: ' + error.message, 'error');
-            return;
-        }
+        processAudio(url);
+        return;
     }
 
     console.log('📥 Downloading:', type, url);
@@ -398,7 +431,47 @@ async function downloadVideoDirect(encodedUrl, type = 'video') {
     a.click();
     document.body.removeChild(a);
 
-    showMessage('🎉 Đang tải xuống...', 'success');
+    const successMsg = currentLang === 'vi' ? '🎉 Đang tải xuống...' : '🎉 Downloading...';
+    showMessage(successMsg, 'success');
+}
+
+async function processAudio(url) {
+    const langData = window.translations[currentLang];
+    const extractMsg = currentLang === 'vi' ? '🎵 Đang trích xuất nhạc từ video... Vui lòng chờ.' : '🎵 Extracting audio from video... Please wait.';
+    showMessage(extractMsg, 'info');
+
+    try {
+        const response = await fetch('/api/convert-mp3', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ videoUrl: url })
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Lỗi trích xuất audio');
+        }
+
+        // Get the blob and download it
+        const blob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `tiktok-audio-${Date.now()}.mp3`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(downloadUrl);
+
+        const successMsg = currentLang === 'vi' ? '✅ Tải nhạc thành công!' : '✅ Audio downloaded successfully!';
+        showMessage(successMsg, 'success');
+        showSuccessModal();
+    } catch (error) {
+        console.error('Audio conversion error:', error);
+        showMessage('❌ Error: ' + error.message, 'error');
+    }
 }
 
 /**
@@ -445,11 +518,12 @@ function clearPreview() {
 function setLoadingState(loading) {
     const btnText = downloadBtn.querySelector('span');
     const btnIcon = downloadBtn.querySelector('svg');
+    const langData = window.translations[currentLang];
 
     if (loading) {
         downloadBtn.disabled = true;
         btnIcon.style.display = 'none';
-        btnText.textContent = 'Đang xử lý...';
+        btnText.textContent = langData['processing'];
 
         const loader = document.createElement('span');
         loader.className = 'loading';
@@ -458,7 +532,7 @@ function setLoadingState(loading) {
     } else {
         downloadBtn.disabled = false;
         btnIcon.style.display = 'block';
-        btnText.textContent = 'Tải xuống';
+        btnText.textContent = langData['download_btn'];
 
         const loader = document.getElementById('loader');
         if (loader) {
@@ -524,26 +598,32 @@ function closeStickyBanner() {
  * Show affiliate interstitial during loading
  */
 function showAffiliateInterstitial() {
+    const langData = window.translations[currentLang];
     const interstitial = document.createElement('div');
     interstitial.className = 'affiliate-interstitial';
+
+    const waitMsg = currentLang === 'vi' ? '⏰ Trong lúc chờ đợi...' : '⏰ While you wait...';
+    const exploreMsg = currentLang === 'vi' ? 'Khám phá ngay deals hot từ Shopee - Giảm đến 50%!' : 'Explore hot deals from Shopee - Up to 50% OFF!';
+    const viewNowMsg = currentLang === 'vi' ? 'Xem Ngay 🎁' : 'View Now 🎁';
+
     interstitial.innerHTML = `
         <div class="affiliate-interstitial-content">
             <div class="affiliate-interstitial-loader">
                 <div class="loading-spinner"></div>
-                <p>Đang xử lý video của bạn...</p>
+                <p>${langData['processing']}</p>
             </div>
             <div class="affiliate-interstitial-ad">
-                <h3>⏰ Trong lúc chờ đợi...</h3>
-                <p>Khám phá ngay deals hot từ Shopee - Giảm đến 50%!</p>
-                <a href="https://tinyurl.com/SSISY" target="_blank" rel="noopener" class="affiliate-interstitial-btn" onclick="trackAffiliateClick('interstitial')">
-                    Xem Ngay 🎁
+                <h3>${waitMsg}</h3>
+                <p>${exploreMsg}</p>
+                <a href="${window.AFFILIATE_LINK || 'https://tinyurl.com/SSISY'}" target="_blank" rel="noopener" class="affiliate-interstitial-btn" onclick="trackAffiliateClick('interstitial')">
+                    ${viewNowMsg}
                 </a>
             </div>
         </div>
     `;
     document.body.appendChild(interstitial);
 
-    // Auto remove after 3 seconds or when download completes
+    // Auto remove after 8 seconds
     setTimeout(() => {
         if (interstitial.parentNode) {
             interstitial.remove();
@@ -557,18 +637,25 @@ function showAffiliateInterstitial() {
  * Show success modal after download
  */
 function showSuccessModal() {
+    const langData = window.translations[currentLang];
     const modal = document.createElement('div');
+
+    const title = currentLang === 'vi' ? 'Tải xuống thành công!' : 'Download successful!';
+    const desc = currentLang === 'vi' ? 'Video đã được lưu vào thiết bị của bạn' : 'Video has been saved to your device';
+    const offerTitle = currentLang === 'vi' ? '🎉 <strong>Ưu đãi đặc biệt dành cho bạn!</strong>' : '🎉 <strong>Special offer for you!</strong>';
+    const offerBtn = currentLang === 'vi' ? 'Nhận voucher Shopee miễn phí' : 'Get free Shopee voucher';
+
     modal.className = 'success-modal';
     modal.innerHTML = `
         <div class="success-modal-content">
             <button class="success-modal-close" onclick="this.parentElement.parentElement.remove()">×</button>
             <div class="success-modal-icon">✅</div>
-            <h3>Tải xuống thành công!</h3>
-            <p>Video đã được lưu vào thiết bị của bạn</p>
+            <h3>${title}</h3>
+            <p>${desc}</p>
             <div class="success-modal-offer">
-                <p class="offer-text">🎉 <strong>Ưu đãi đặc biệt dành cho bạn!</strong></p>
-                <a href="https://tinyurl.com/SSISY" target="_blank" rel="noopener" class="success-modal-btn" onclick="trackAffiliateClick('success_modal')">
-                    Nhận voucher Shopee miễn phí
+                <p class="offer-text">${offerTitle}</p>
+                <a href="${window.AFFILIATE_LINK || 'https://tinyurl.com/SSISY'}" target="_blank" rel="noopener" class="success-modal-btn" onclick="trackAffiliateClick('success_modal')">
+                    ${offerBtn}
                 </a>
             </div>
         </div>
@@ -610,7 +697,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         if (navigator.clipboard && navigator.clipboard.readText) {
             const text = await navigator.clipboard.readText();
-            if (isValidTikTokUrl(text)) {
+            if (detectPlatform(text)) {
                 videoUrlInput.value = text;
                 videoUrlInput.focus();
             }

@@ -5,15 +5,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="TikDown - Tải video TikTok không logo, chất lượng HD miễn phí. Hỗ trợ tải MP4, MP3 và đảo ngang video cho reup.">
-    <meta name="keywords" content="tiktok downloader, tải video tiktok, tiktok no watermark, tikdown, đảo ngang video">
-    <title>TikDown - Tải Video TikTok Không Logo | Đảo Ngang Video</title>
+        content="TikDown - Tải video TikTok không logo, Facebook Reels chất lượng HD miễn phí. Hỗ trợ tải MP4, MP3 và đảo ngang video cho reup."
+        data-i18n-attr="description">
+    <meta name="keywords"
+        content="tiktok downloader, tải video tiktok, tiktok no watermark, tikdown, đảo ngang video, facebook reels downloader">
+    <title data-i18n="title">TikDown - Tải Video TikTok Không Logo (SnapTik Alternative) & Facebook Reels</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="affiliate-styles.css">
+
+    <!-- JSON-LD Schema for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "TikDown",
+      "operatingSystem": "Windows, macOS, Android, iOS",
+      "applicationCategory": "MultimediaApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Tải video TikTok không logo, Facebook Reels chất lượng cao miễn phí."
+    }
+    </script>
 </head>
 
 <body>
@@ -39,19 +58,52 @@
                 <span>TikDown</span>
             </div>
             <nav class="nav-links">
-                <a href="http://careviona.com/" target="_blank" class="nav-backlink">
+                <!-- Language Switcher -->
+                <div class="lang-switcher">
+                    <button id="langBtn" class="lang-btn">
+                        <span id="currentLang">VI</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M6 9l6 6 6-6" />
+                        </svg>
+                    </button>
+                    <div class="lang-dropdown">
+                        <div class="lang-grid">
+                            <button onclick="changeLanguage('vi')"><span class="lang-code">VN</span> Tiếng Việt</button>
+                            <button onclick="changeLanguage('en')"><span class="lang-code">GB</span> English</button>
+                            <button onclick="changeLanguage('id')"><span class="lang-code">ID</span> Bahasa</button>
+                            <button onclick="changeLanguage('es')"><span class="lang-code">ES</span> Español</button>
+                            <button onclick="changeLanguage('fr')"><span class="lang-code">FR</span> Français</button>
+                            <button onclick="changeLanguage('de')"><span class="lang-code">DE</span> Deutsch</button>
+                            <button onclick="changeLanguage('pt')"><span class="lang-code">PT</span> Português</button>
+                            <button onclick="changeLanguage('ru')"><span class="lang-code">RU</span> Русский</button>
+                            <button onclick="changeLanguage('tr')"><span class="lang-code">TR</span> Türkçe</button>
+                            <button onclick="changeLanguage('th')"><span class="lang-code">TH</span> ไทย</button>
+                            <button onclick="changeLanguage('ja')"><span class="lang-code">JP</span> 日本語</button>
+                            <button onclick="changeLanguage('zh')"><span class="lang-code">CN</span> 中文</button>
+                            <button onclick="changeLanguage('ko')"><span class="lang-code">KR</span> 한국어</button>
+                            <button onclick="changeLanguage('ar')"><span class="lang-code">SA</span> العربية</button>
+                            <button onclick="changeLanguage('hi')"><span class="lang-code">IN</span> हिंदी</button>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="http://careviona.com/" target="_blank" class="nav-backlink" data-i18n="nav_backlink">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                     </svg>
                     Careviona - Đặt Lịch Khám Bệnh Tại Hà Nội
                 </a>
                 <button id="darkModeToggle" class="dark-mode-toggle" title="Chế độ tối">
-                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="5"/>
-                        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <circle cx="12" cy="12" r="5" />
+                        <path
+                            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
                     </svg>
-                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" style="display:none">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                     </svg>
                 </button>
             </nav>
@@ -60,11 +112,11 @@
         <main class="main-content">
             <div class="hero-section">
                 <h1 class="title">
-                    Tải Video TikTok
-                    <span class="gradient-text">Không Logo</span>
+                    <span data-i18n="hero_title">Tải Video TikTok</span>
+                    <span class="gradient-text" data-i18n="hero_gradient">Không Logo</span>
                 </h1>
-                <p class="subtitle">
-                    Tải video TikTok nhanh chóng, chất lượng cao, miễn phí 100%
+                <p class="subtitle" data-i18n="hero_subtitle">
+                    Tải video TikTok & Facebook Reels nhanh chóng, chất lượng HD, miễn phí 100%
                 </p>
 
                 <div class="download-card">
@@ -81,14 +133,17 @@
                                     stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                     stroke-linejoin="round" />
                             </svg>
-                            <input type="text" id="videoUrl" class="url-input" placeholder="Dán link TikTok hoặc Facebook vào đây..."
-                                required>
+                            <input type="text" id="videoUrl" class="url-input"
+                                placeholder="Dán link TikTok hoặc Facebook vào đây..." required
+                                data-i18n-attr="placeholder" data-i18n-key="input_placeholder">
                             <button type="button" id="pasteBtn" class="paste-btn" title="Dán link">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-                                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path
+                                        d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
                                 </svg>
-                                <span>Dán</span>
+                                <span data-i18n="paste_btn">Dán</span>
                             </button>
                         </div>
                         <button type="submit" class="download-btn">
@@ -97,7 +152,7 @@
                                 <path d="M10 13L5 8H8V2H12V8H15L10 13Z" fill="currentColor" />
                                 <path d="M2 16H18V18H2V16Z" fill="currentColor" />
                             </svg>
-                            <span>Tải xuống</span>
+                            <span data-i18n="download_btn">Tải xuống</span>
                         </button>
                     </form>
 
@@ -107,13 +162,13 @@
                                 <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="2" />
                                 <path d="M8 4V8L11 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                             </svg>
-                            <span>Nhanh chóng</span>
+                            <span data-i18n="quick_tip_fast">Nhanh chóng</span>
                         </div>
                         <div class="tip">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                 <path d="M8 1L10 6L15 8L10 10L8 15L6 10L1 8L6 6L8 1Z" fill="currentColor" />
                             </svg>
-                            <span>Không logo</span>
+                            <span data-i18n="quick_tip_no_logo">Không logo</span>
                         </div>
                         <div class="tip">
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -122,7 +177,7 @@
                                 <path d="M6 8L8 10L12 5" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" />
                             </svg>
-                            <span>Chất lượng HD</span>
+                            <span data-i18n="quick_tip_hd">Chất lượng HD</span>
                         </div>
                     </div>
                 </div>
@@ -138,8 +193,8 @@
                                     stroke-linecap="round" />
                             </svg>
                         </div>
-                        <h3>Tải nhanh chóng</h3>
-                        <p>Tải video chỉ trong vài giây, không cần đợi lâu</p>
+                        <h3 data-i18n="feature_fast_title">Tải nhanh chóng</h3>
+                        <p data-i18n="feature_fast_desc">Tải video chỉ trong vài giây, không cần đợi lâu</p>
                     </div>
 
                     <div class="feature-card">
@@ -150,8 +205,8 @@
                                 <path d="M13 11L19 16L13 21V11Z" fill="currentColor" />
                             </svg>
                         </div>
-                        <h3>Chất lượng cao</h3>
-                        <p>Hỗ trợ tải video Full HD với âm thanh rõ ràng</p>
+                        <h3 data-i18n="feature_hd_title">Chất lượng cao</h3>
+                        <p data-i18n="feature_hd_desc">Hỗ trợ tải video Full HD với âm thanh rõ ràng</p>
                     </div>
 
                     <div class="feature-card">
@@ -161,11 +216,39 @@
                                     stroke-width="2" />
                             </svg>
                         </div>
-                        <h3>Hoàn toàn miễn phí</h3>
-                        <p>Không giới hạn số lượng video tải xuống</p>
+                        <h3 data-i18n="feature_free_title">Hoàn toàn miễn phí</h3>
+                        <p data-i18n="feature_free_desc">Không giới hạn số lượng video tải xuống</p>
                     </div>
                 </div>
             </div>
+
+            <!-- SEO Content: How to use -->
+            <section class="seo-guide">
+                <h2 data-i18n="how_to_title">Cách tải video TikTok không logo bằng TikDown</h2>
+                <div class="guide-steps">
+                    <p data-i18n="how_to_step_1">1. Sao chép liên kết video TikTok hoặc Facebook bạn muốn tải.</p>
+                    <p data-i18n="how_to_step_2">2. Dán liên kết vào ô nhập liệu ở đầu trang TikDown.</p>
+                    <p data-i18n="how_to_step_3">3. Nhấn nút 'Tải xuống' và chọn định dạng bạn muốn lưu về máy.</p>
+                </div>
+            </section>
+
+            <!-- SEO Content: FAQ -->
+            <section class="seo-faq">
+                <h2 data-i18n="faq_title">Câu hỏi thường gặp (FAQ)</h2>
+                <div class="faq-item">
+                    <h4 data-i18n="faq_q1">Tải video TikTok tại TikDown có mất phí không?</h4>
+                    <p data-i18n="faq_a1">Hoàn toàn không. TikDown là công cụ miễn phí 100%.</p>
+                </div>
+                <div class="faq-item">
+                    <h4 data-i18n="faq_q2">Video tải về có bị dính logo hay watermark không?</h4>
+                    <p data-i18n="faq_a2">Không, TikDown hỗ trợ trích lọc và loại bỏ hoàn toàn logo TikTok.</p>
+                </div>
+                <div class="faq-item">
+                    <h4 data-i18n="faq_q3">Tôi có thể tải video Facebook bằng TikDown không?</h4>
+                    <p data-i18n="faq_a3">Có, TikDown hỗ trợ tải cả video thường và Reels từ Facebook với chất lượng
+                        cao.</p>
+                </div>
+            </section>
 
             <!-- Shopee Affiliate Banner -->
             <div class="affiliate-banner">
@@ -183,12 +266,13 @@
                         </svg>
                     </div>
                     <div class="affiliate-text">
-                        <h3>🎁 Quà Tặng Đặc Biệt Dành Cho Bạn!</h3>
-                        <p>Nhận voucher giảm giá & deals hot từ Shopee - Mua sắm thông minh hơn!</p>
+                        <h3 data-i18n="gift_title">🎁 Quà Tặng Đặc Biệt Dành Cho Bạn!</h3>
+                        <p data-i18n="gift_desc">Nhận voucher giảm giá & deals hot từ Shopee - Mua sắm thông minh hơn!
+                        </p>
                     </div>
                     <a href="https://tinyurl.com/SSISY" target="_blank" rel="noopener" class="affiliate-btn"
                         onclick="trackAffiliateClick('banner')">
-                        <span>Nhận Ưu Đãi Ngay</span>
+                        <span data-i18n="gift_btn">Nhận Ưu Đãi Ngay</span>
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                             <path d="M7 4L13 10L7 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
                         </svg>
@@ -198,18 +282,21 @@
         </main>
 
         <footer class="footer">
-            <p>&copy; 2025 TikDown. Tất cả quyền được bảo lưu.</p>
-            <p class="footer-note">💡 Mua sắm thông minh với <a href="https://tinyurl.com/SSISY" target="_blank"
-                    rel="noopener" onclick="trackAffiliateClick('footer')">ưu đãi Shopee</a></p>
+            <p data-i18n="footer_rights">&copy; 2025 TikDown. Tất cả quyền được bảo lưu.</p>
+            <p class="footer-note">
+                <span data-i18n="footer_shop">💡 Mua sắm thông minh với</span>
+                <a href="https://tinyurl.com/SSISY" target="_blank" rel="noopener"
+                    onclick="trackAffiliateClick('footer')" data-i18n="footer_shopee_link">ưu đãi Shopee</a>
+            </p>
         </footer>
     </div>
 
     <!-- Sticky Bottom Banner -->
     <div class="sticky-banner" id="stickyBanner">
         <div class="sticky-banner-content">
-            <span class="sticky-banner-text">🎉 Giảm giá đến 50% - Shopee deals hot!</span>
+            <span class="sticky-banner-text" data-i18n="sticky_deal">🎉 Giảm giá đến 50% - Shopee deals hot!</span>
             <a href="https://tinyurl.com/SSISY" target="_blank" rel="noopener" class="sticky-banner-btn"
-                onclick="trackAffiliateClick('sticky')">Xem ngay</a>
+                onclick="trackAffiliateClick('sticky')" data-i18n="sticky_view_now">Xem ngay</a>
             <button class="sticky-banner-close" onclick="closeStickyBanner()">×</button>
         </div>
     </div>
@@ -243,6 +330,7 @@
         </a>
     </div>
 
+    <script src="translations.js"></script>
     <script src="flip.js"></script>
     <script src="script.js"></script>
 </body>
