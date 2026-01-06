@@ -9,7 +9,14 @@ const flipRouter = require('./routes/flip');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware cơ bản
+/* =========================
+   TRUST PROXY (RAILWAY)
+========================= */
+app.set('trust proxy', true);
+
+/* =========================
+   BASIC MIDDLEWARES
+========================= */
 app.use(cors({
   origin: process.env.FRONTEND_URL || '*',
   methods: ['GET', 'POST'],
@@ -18,25 +25,52 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ SERVE STATIC FILES – PHẢI ĐẶT TRƯỚC
+/* =========================
+   REDIRECT non-www → www
+   (HTTP non-www sẽ redirect được)
+========================= */
+app.use((req, res, next) => {
+  const host = req.headers.host;
+
+  if (host === 'tikdown.top') {
+    return res.redirect(
+      301,
+      'https://www.tikdown.top' + req.originalUrl
+    );
+  }
+
+  next();
+});
+
+/* =========================
+   SERVE STATIC FILES
+========================= */
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Logging (để sau static)
+/* =========================
+   LOGGING
+========================= */
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
 });
 
-// API routes
+/* =========================
+   API ROUTES
+========================= */
 app.use('/api', downloadRouter);
 app.use('/api', flipRouter);
 
-// Homepage (optional – static đã cover rồi)
+/* =========================
+   HOMEPAGE (OPTIONAL)
+========================= */
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Error handler
+/* =========================
+   ERROR HANDLER
+========================= */
 app.use((err, req, res, next) => {
   console.error('Error:', err.message);
   res.status(err.status || 500).json({
@@ -45,7 +79,9 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler (sau cùng)
+/* =========================
+   404 HANDLER
+========================= */
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -53,6 +89,9 @@ app.use((req, res) => {
   });
 });
 
+/* =========================
+   START SERVER
+========================= */
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
