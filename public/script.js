@@ -258,7 +258,7 @@ function showVideoPreview(data) {
                 const btnStyle = isAudio ? 'background: var(--gradient-secondary);' : 'background: linear-gradient(135deg, #FF0000 0%, #CC0000 100%);';
                 const label = isAudio ? `🎵 ${opt.quality} MP3` : `📥 ${opt.quality} ${opt.format.toUpperCase()}`;
                 return `
-                    <button onclick="downloadVideoDirect('${encodeURIComponent(opt.url)}', '${opt.type}')" class="download-video-btn" style="${btnStyle}">
+                    <button onclick="downloadVideoDirect('${encodeURIComponent(opt.url)}', '${opt.type}', 'youtube')" class="download-video-btn" style="${btnStyle}">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                             <path d="M10 13L5 8H8V2H12V8H15L10 13Z" fill="currentColor"/>
                             <path d="M2 16H18V18H2V16Z" fill="currentColor"/>
@@ -270,7 +270,7 @@ function showVideoPreview(data) {
         } else if (data.downloadUrl) {
             // Fallback to single download button
             downloadButtons = `
-                <button onclick="downloadVideoDirect('${encodeURIComponent(data.downloadUrl)}', 'video')" class="download-video-btn" style="background: linear-gradient(135deg, #FF0000 0%, #CC0000 100%);">
+                <button onclick="downloadVideoDirect('${encodeURIComponent(data.downloadUrl)}', 'video', 'youtube')" class="download-video-btn" style="background: linear-gradient(135deg, #FF0000 0%, #CC0000 100%);">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                         <path d="M10 13L5 8H8V2H12V8H15L10 13Z" fill="currentColor"/>
                         <path d="M2 16H18V18H2V16Z" fill="currentColor"/>
@@ -291,7 +291,7 @@ function showVideoPreview(data) {
 
         downloadButtons = `
             ${hdUrl ? `
-            <button onclick="downloadVideoDirect('${encodeURIComponent(hdUrl)}', 'video')" class="download-video-btn" style="background: linear-gradient(135deg, #1877F2 0%, #42A5F5 100%);">
+            <button onclick="downloadVideoDirect('${encodeURIComponent(hdUrl)}', 'video', 'facebook')" class="download-video-btn" style="background: linear-gradient(135deg, #1877F2 0%, #42A5F5 100%);">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path d="M10 13L5 8H8V2H12V8H15L10 13Z" fill="currentColor"/>
                     <path d="M2 16H18V18H2V16Z" fill="currentColor"/>
@@ -300,7 +300,7 @@ function showVideoPreview(data) {
             </button>
             ` : ''}
             ${sdUrl ? `
-            <button onclick="downloadVideoDirect('${encodeURIComponent(sdUrl)}', 'video')" class="download-video-btn" style="background: linear-gradient(135deg, #4267B2 0%, #898F9C 100%);">
+            <button onclick="downloadVideoDirect('${encodeURIComponent(sdUrl)}', 'video', 'facebook')" class="download-video-btn" style="background: linear-gradient(135deg, #4267B2 0%, #898F9C 100%);">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path d="M10 13L5 8H8V2H12V8H15L10 13Z" fill="currentColor"/>
                     <path d="M2 16H18V18H2V16Z" fill="currentColor"/>
@@ -312,14 +312,14 @@ function showVideoPreview(data) {
     } else {
         // TikTok: Original buttons
         downloadButtons = `
-            <button onclick="downloadVideoDirect('${encodeURIComponent(data.videoNoWatermark || data.videoUrl)}', 'video')" class="download-video-btn">
+            <button onclick="downloadVideoDirect('${encodeURIComponent(data.videoNoWatermark || data.videoUrl)}', 'video', 'tiktok')" class="download-video-btn">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path d="M10 13L5 8H8V2H12V8H15L10 13Z" fill="currentColor"/>
                     <path d="M2 16H18V18H2V16Z" fill="currentColor"/>
                 </svg>
                 ${langData['download_no_logo']}
             </button>
-            <button onclick="downloadVideoDirect('${encodeURIComponent(data.videoNoWatermark || data.videoUrl)}', 'audio')" class="download-video-btn" style="background: var(--gradient-secondary);">
+            <button onclick="downloadVideoDirect('${encodeURIComponent(data.videoNoWatermark || data.videoUrl)}', 'audio', 'tiktok')" class="download-video-btn" style="background: var(--gradient-secondary);">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path d="M8 5L13 10L8 15V5Z" fill="currentColor"/>
                 </svg>
@@ -453,8 +453,11 @@ function downloadVideoProxy(type = 'video') {
 /**
  * Download video through backend proxy - direct URL version
  * Updated to use server-side conversion for audio
+ * @param {string} encodedUrl - URL encoded download link
+ * @param {string} type - 'video' or 'audio'
+ * @param {string} platform - 'youtube', 'tiktok', or 'facebook'
  */
-async function downloadVideoDirect(encodedUrl, type = 'video') {
+async function downloadVideoDirect(encodedUrl, type = 'video', platform = 'tiktok') {
     if (!encodedUrl) {
         const errMsg = currentLang === 'vi' ? 'Không tìm thấy link tải. Vui lòng thử lại.' : 'Download link not found. Please try again.';
         showMessage(errMsg, 'error');
@@ -469,20 +472,25 @@ async function downloadVideoDirect(encodedUrl, type = 'video') {
         return;
     }
 
-    console.log('📥 Downloading:', type, url);
+    console.log('📥 Downloading:', platform, type, url);
 
-    // Use backend proxy (relative URL)
-    const proxyUrl = `/api/proxy-download?url=${encodeURIComponent(url)}`;
+    // Use backend proxy (relative URL) with source parameter
+    const proxyUrl = `/api/proxy-download?url=${encodeURIComponent(url)}&source=${platform}`;
 
     // Show success modal after a short delay
     setTimeout(() => {
         showSuccessModal();
     }, 1500);
 
+    // Determine filename based on platform
+    const filePrefix = platform || 'video';
+    const extension = type === 'audio' ? 'mp3' : 'mp4';
+    const filename = `${filePrefix}-${type}-${Date.now()}.${extension}`;
+
     // Create temporary link and handle error
     const a = document.createElement('a');
     a.href = proxyUrl;
-    a.download = `tiktok-${type}-${Date.now()}.mp4`;
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
