@@ -672,53 +672,105 @@ body {
     }
 }
 
-/* SEO Sections */
-.seo-guide,
-.seo-faq {
-    margin-top: 60px;
-    padding: 40px;
-    background: var(--card-bg);
-    border-radius: 24px;
-    border: 1px solid var(--border-color);
-}
-
-.seo-guide h2,
-.seo-faq h2 {
-    font-size: 24px;
-    margin-bottom: 24px;
-    background: var(--accent-gradient);
+/* SEO Sections Common */
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    text-align: center;
+    background: var(--gradient-primary);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-.guide-steps p {
-    margin-bottom: 12px;
+/* SEO About */
+.seo-about {
+    margin-bottom: 5rem;
+}
+
+.about-content {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+    font-size: 1.1rem;
     color: var(--text-secondary);
-    line-height: 1.6;
+    line-height: 1.8;
 }
 
-.faq-item {
-    margin-bottom: 24px;
+.about-content p {
+    margin-bottom: 1.5rem;
 }
 
-.faq-item h4 {
-    margin-bottom: 8px;
+/* SEO Guide */
+.seo-guide {
+    margin-bottom: 5rem;
+    padding: 3rem;
+    background: var(--card-bg);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.guide-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 3rem;
+}
+
+.guide-step {
+    text-align: center;
+    padding: 1rem;
+}
+
+.step-number {
+    width: 50px;
+    height: 50px;
+    background: var(--gradient-primary);
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 800;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    box-shadow: var(--shadow-md);
+}
+
+.guide-step h3 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
     color: var(--text-primary);
-    font-size: 18px;
 }
 
-.faq-item p {
+.guide-step p {
     color: var(--text-secondary);
+    font-size: 1rem;
     line-height: 1.6;
 }
 
-@media (max-width: 768px) {
+/* SEO Features */
+.seo-features {
+    margin-bottom: 5rem;
+}
 
-    .seo-guide,
-    .seo-faq {
-        padding: 24px;
-        margin-top: 40px;
+/* All media query adjustments */
+@media (max-width: 768px) {
+    .section-title {
+        font-size: 1.8rem;
+    }
+
+    .guide-grid {
+        gap: 2rem;
+    }
+
+    .seo-guide {
+        padding: 2rem 1.5rem;
+    }
+
+    .faq-grid {
+        grid-template-columns: 1fr;
     }
 }
 
