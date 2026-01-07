@@ -101,6 +101,35 @@ router.get('/proxy-download', async (req, res) => {
             });
         }
 
+        // --- SECURITY: SSRF PROTECTION ---
+        try {
+            const parsedUrl = new URL(url);
+            const allowedDomains = [
+                'facebook.com', 'fbcdn.net', 'fna.fbcdn.net'
+            ];
+
+            const isAllowed = allowedDomains.some(domain =>
+                parsedUrl.hostname === domain || parsedUrl.hostname.endsWith('.' + domain)
+            );
+
+            if (!isAllowed) {
+                console.warn('❌ Blocked suspicious FB proxy request to:', parsedUrl.hostname);
+                return res.status(403).json({
+                    success: false,
+                    error: 'Domain not allowed for proxying'
+                });
+            }
+
+            // Block local addresses
+            const host = parsedUrl.hostname.toLowerCase();
+            if (host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0' || host.startsWith('192.168.') || host.startsWith('10.')) {
+                return res.status(403).json({ success: false, error: 'Restricted address' });
+            }
+        } catch (e) {
+            return res.status(400).json({ success: false, error: 'Invalid URL' });
+        }
+        // --- END SECURITY ---
+
         console.log(`🎬 Proxying Facebook ${quality || 'video'} download`);
 
         // Stream the video through our server
@@ -109,7 +138,8 @@ router.get('/proxy-download', async (req, res) => {
             url: url,
             responseType: 'stream',
             timeout: 30000,
-            maxRedirects: 5,
+            maxRedirects: 3,
+            maxContentLength: 200 * 1024 * 1024, // 200MB limit for FB high quality
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 'Accept': '*/*',

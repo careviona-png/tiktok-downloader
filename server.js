@@ -1,5 +1,7 @@
 require('dotenv').config();
 const express = require('express');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const cors = require('cors');
 const path = require('path');
 const downloadRouter = require('./routes/download');
@@ -11,6 +13,21 @@ const PORT = process.env.PORT || 3000;
 
 
 // Middleware
+app.use(helmet({
+  contentSecurityPolicy: false, // Disable temporarily if it breaks external assets, but recommended to keep on
+  crossOriginEmbedderPolicy: false
+}));
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: {
+    success: false,
+    error: 'Too many requests from this IP, please try again after 15 minutes'
+  }
+});
+app.use('/api', limiter);
+
 app.use((req, res, next) => {
   const host = req.get('host');
   if (host === 'tikdown.top') {

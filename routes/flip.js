@@ -1,11 +1,19 @@
 const express = require('express');
 const router = express.Router();
+const rateLimit = require('express-rate-limit');
 const { flipVideo, downloadVideo } = require('../utils/videoFlipper');
 const path = require('path');
 const fs = require('fs');
 
+// Limit flip requests because they are CPU intensive
+const flipLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 10, // 10 flips per hour per IP
+    message: { success: false, error: 'Daily/Hourly flip limit reached. Please try again later.' }
+});
+
 // POST /api/flip - Flip video horizontally
-router.post('/flip', async (req, res) => {
+router.post('/flip', flipLimiter, async (req, res) => {
     try {
         const { videoUrl } = req.body;
 

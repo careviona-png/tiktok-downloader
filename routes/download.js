@@ -102,6 +102,39 @@ router.get('/proxy-download', async (req, res) => {
             });
         }
 
+        // --- SECURITY: SSRF PROTECTION ---
+        try {
+            const parsedUrl = new URL(url);
+            const allowedDomains = [
+                'tiktok.com', 'www.tiktok.com', 'vm.tiktok.com', 'vt.tiktok.com',
+                'v16-webapp.tiktokcdn-us.com', 'v16-webapp.tiktokcdn.com',
+                'v19-webapp-s.tiktokcdn.com', 'v21-webapp-s.tiktokcdn.com',
+                'v31-webapp-s.tiktokcdn.com', 'v35-webapp-s.tiktokcdn.com',
+                'tiktokcdn.com', 'muscdn.com', 'tikwm.com', 'www.tikwm.com'
+            ];
+
+            const isAllowed = allowedDomains.some(domain =>
+                parsedUrl.hostname === domain || parsedUrl.hostname.endsWith('.' + domain)
+            );
+
+            if (!isAllowed) {
+                console.warn('❌ Blocked suspicious proxy request to:', parsedUrl.hostname);
+                return res.status(403).json({
+                    success: false,
+                    error: 'Domain not allowed for proxying'
+                });
+            }
+
+            // Block local addresses
+            const host = parsedUrl.hostname.toLowerCase();
+            if (host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0' || host.startsWith('192.168.') || host.startsWith('10.')) {
+                return res.status(403).json({ success: false, error: 'Restricted address' });
+            }
+        } catch (e) {
+            return res.status(400).json({ success: false, error: 'Invalid URL' });
+        }
+        // --- END SECURITY ---
+
         const isAudio = type === 'audio' || (url && url.toLowerCase().endsWith('.mp3'));
         console.log(`🎬 Proxying ${isAudio ? 'audio' : 'video'} download for:`, url);
 
@@ -110,8 +143,9 @@ router.get('/proxy-download', async (req, res) => {
             method: 'GET',
             url: url,
             responseType: 'stream',
-            timeout: 15000,
-            maxRedirects: 5,
+            timeout: 20000,
+            maxRedirects: 3,
+            maxContentLength: 100 * 1024 * 1024, // 100MB limit
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 'Accept': '*/*',
