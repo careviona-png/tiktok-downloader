@@ -1,11 +1,11 @@
 const translations = {
     vi: {
-        "title": "TikDown - Tải Video TikTok Không Logo (SnapTik Alternative) & Facebook Reels",
-        "description": "TikDown - Tải video TikTok không logo, Facebook Reels chất lượng HD miễn phí. Hỗ trợ tải MP4, MP3 và đảo ngang video cho reup.",
+        "title": "TikDown - Tải Video TikTok Không Logo, Watermark (SnapTik Alternative)",
+        "description": "Tải video TikTok không logo (watermark) miễn phí tại TikDown. Công cụ tốt nhất thay thế SnapTik để tải TikTok HD, Facebook Reels không logo nhanh nhất x2.",
         "nav_backlink": "Careviona - Đặt Lịch Khám Bệnh Tại Hà Nội",
         "hero_title": "Tải Video TikTok",
-        "hero_gradient": "Không Logo",
-        "hero_subtitle": "Tải video TikTok & Facebook Reels nhanh chóng, chất lượng HD, miễn phí 100%",
+        "hero_gradient": "Không Logo (Watermark)",
+        "hero_subtitle": "Công cụ tải video TikTok không logo số 1 Việt Nam - Nhanh, mượt, chất lượng HD 4K",
         "input_placeholder": "Dán link TikTok hoặc Facebook vào đây...",
         "paste_btn": "Dán",
         "download_btn": "Tải xuống",
