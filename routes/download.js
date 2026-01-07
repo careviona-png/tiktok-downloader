@@ -8,7 +8,7 @@ const axios = require('axios');
 const fs = require('fs');
 
 // POST /api/download
-router.post('/download', async (req, res) => {
+router.post('/', async (req, res) => {
     try {
         const { url } = req.body;
 

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getYoutubeInfo } = require('../utils/youtube');
-const cache = require('../utils/cache');
+const { getCache, setCache } = require('../utils/cache');
 
 // POST /api/youtube/download
 router.post('/download', async (req, res) => {
@@ -18,7 +18,7 @@ router.post('/download', async (req, res) => {
 
     try {
         // Check cache first
-        const cachedData = cache.get(url);
+        const cachedData = getCache(url);
         if (cachedData) {
             return res.json(cachedData);
         }
@@ -27,9 +27,12 @@ router.post('/download', async (req, res) => {
         const videoData = await getYoutubeInfo(url);
 
         // Cache the result for 1 hour
-        cache.set(url, videoData);
+        setCache(url, videoData);
 
-        res.json(videoData);
+        res.json({
+            success: true,
+            data: videoData
+        });
     } catch (error) {
         console.error('YouTube Route Error:', error.message);
         res.status(500).json({ error: error.message || 'Lỗi xử lý video YouTube' });
