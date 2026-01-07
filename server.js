@@ -75,6 +75,15 @@ app.get('/tai-video-youtube-shorts-online', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'tai-video-youtube-shorts.html'));
 });
 
+// Legal Policy Pages
+app.get('/disclaimer-policy', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'disclaimer-policy.html'));
+});
+
+app.get('/dmca-policy', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dmca-policy.html'));
+});
+
 // Serve static frontend files AFTER specific routes
 app.use(express.static(path.join(__dirname, 'public')));
 
