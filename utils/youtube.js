@@ -1,8 +1,8 @@
-const { spawn } = require('child_process');
 const axios = require('axios');
 
 /**
- * Extract YouTube video/shorts information using yt-dlp binary
+ * Extract YouTube video/shorts information
+ * Uses Cobalt.tools API which is reliable and actively maintained
  * @param {string} url - YouTube URL
  * @returns {Promise<Object>} - Video metadata
  */
@@ -16,146 +16,176 @@ async function getYoutubeInfo(url) {
 
     console.log('[YouTube] Video ID:', videoId);
 
+    // Get metadata from oEmbed first
+    let metadata = null;
     try {
-        // Use yt-dlp to get video info
-        const info = await getYtdlpInfo(url);
-
-        if (info && info.title) {
-            console.log('[YouTube] Got info via yt-dlp:', info.title);
-            return formatResponse(info, videoId, url);
-        }
-    } catch (e) {
-        console.log('[YouTube] yt-dlp failed:', e.message);
-    }
-
-    // Fallback to oEmbed for basic metadata
-    try {
-        const oembedData = await getVideoInfoOEmbed(url, videoId);
-        console.log('[YouTube] Got metadata via oEmbed (no download URL)');
-        return formatResponse(oembedData || {}, videoId, url);
+        metadata = await getVideoInfoOEmbed(url, videoId);
+        console.log('[YouTube] Got metadata:', metadata.title);
     } catch (e) {
         console.log('[YouTube] oEmbed failed:', e.message);
     }
 
-    // Return basic info with thumbnail
-    return formatResponse({
-        title: 'YouTube Video',
-        thumbnail: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
-        author: 'Unknown'
-    }, videoId, url);
+    // Try Cobalt API for download URL
+    let downloadData = null;
+    try {
+        downloadData = await getCobaltDownload(url);
+        console.log('[YouTube] Got Cobalt download URL:', downloadData ? 'YES' : 'NO');
+    } catch (e) {
+        console.log('[YouTube] Cobalt failed:', e.message);
+    }
+
+    // Try alternative API if Cobalt fails
+    if (!downloadData || !downloadData.downloadUrl) {
+        try {
+            downloadData = await getAlternativeDownload(url, videoId);
+            console.log('[YouTube] Got alternative download URL:', downloadData ? 'YES' : 'NO');
+        } catch (e) {
+            console.log('[YouTube] Alternative API failed:', e.message);
+        }
+    }
+
+    return formatResponse(
+        { ...metadata, ...downloadData },
+        videoId,
+        url
+    );
 }
 
 /**
- * Get video info using yt-dlp binary
+ * Get download URL via Cobalt.tools API
+ * Cobalt is an open-source project that provides reliable media downloads
  */
-function getYtdlpInfo(url) {
-    return new Promise((resolve, reject) => {
-        const args = [
-            '--dump-json',
-            '--no-playlist',
-            '--no-warnings',
-            '-f', 'best[ext=mp4]/best',
-            url
-        ];
-
-        console.log('[YouTube] Running yt-dlp with args:', args.join(' '));
-
-        const ytdlp = spawn('yt-dlp', args, {
-            timeout: 60000 // 60 second timeout
-        });
-
-        let stdout = '';
-        let stderr = '';
-
-        ytdlp.stdout.on('data', (data) => {
-            stdout += data.toString();
-        });
-
-        ytdlp.stderr.on('data', (data) => {
-            stderr += data.toString();
-        });
-
-        ytdlp.on('close', (code) => {
-            if (code === 0 && stdout) {
-                try {
-                    const info = JSON.parse(stdout);
-
-                    // Build download options from formats
-                    const downloadOptions = [];
-                    const formats = info.formats || [];
-
-                    // Find combined formats (video + audio)
-                    const combinedFormats = formats.filter(f =>
-                        f.vcodec && f.vcodec !== 'none' &&
-                        f.acodec && f.acodec !== 'none' &&
-                        f.url
-                    ).sort((a, b) => (b.height || 0) - (a.height || 0));
-
-                    // Add unique qualities
-                    const addedQualities = new Set();
-                    combinedFormats.forEach(f => {
-                        const quality = f.height ? `${f.height}p` : 'Auto';
-                        if (!addedQualities.has(quality) && downloadOptions.length < 3) {
-                            addedQualities.add(quality);
-                            downloadOptions.push({
-                                quality: quality,
-                                url: f.url,
-                                type: 'video',
-                                format: f.ext || 'mp4',
-                                size: f.filesize ? formatBytes(f.filesize) : 'Unknown'
-                            });
-                        }
-                    });
-
-                    // Find audio formats
-                    const audioFormats = formats.filter(f =>
-                        f.acodec && f.acodec !== 'none' &&
-                        (!f.vcodec || f.vcodec === 'none') &&
-                        f.url
-                    ).sort((a, b) => (b.abr || 0) - (a.abr || 0));
-
-                    if (audioFormats.length > 0) {
-                        const bestAudio = audioFormats[0];
-                        downloadOptions.push({
-                            quality: bestAudio.abr ? `${Math.round(bestAudio.abr)}kbps` : 'Best',
-                            url: bestAudio.url,
-                            type: 'audio',
-                            format: bestAudio.ext || 'm4a',
-                            size: bestAudio.filesize ? formatBytes(bestAudio.filesize) : 'Unknown'
-                        });
-                    }
-
-                    // Get best download URL
-                    const bestFormat = combinedFormats[0];
-
-                    resolve({
-                        title: info.title,
-                        author: info.uploader || info.channel,
-                        thumbnail: info.thumbnail || `https://i.ytimg.com/vi/${info.id}/maxresdefault.jpg`,
-                        duration: formatDuration(info.duration),
-                        views: formatViews(info.view_count),
-                        downloadUrl: bestFormat ? bestFormat.url : info.url,
-                        downloadOptions: downloadOptions,
-                        quality: bestFormat ? (bestFormat.height ? `${bestFormat.height}p` : 'HD') : 'HD'
-                    });
-                } catch (parseError) {
-                    reject(new Error('Failed to parse yt-dlp output'));
-                }
-            } else {
-                console.log('[YouTube] yt-dlp stderr:', stderr);
-                reject(new Error(stderr || 'yt-dlp failed with code ' + code));
+async function getCobaltDownload(url) {
+    try {
+        // Try the main Cobalt API
+        const response = await axios.post('https://co.wuk.sh/api/json', {
+            url: url,
+            vCodec: 'h264',
+            vQuality: '720',
+            aFormat: 'mp3',
+            filenamePattern: 'basic',
+            isAudioOnly: false
+        }, {
+            timeout: 30000,
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             }
         });
 
-        ytdlp.on('error', (err) => {
-            console.log('[YouTube] yt-dlp spawn error:', err.message);
-            reject(err);
-        });
-    });
+        if (response.data) {
+            const data = response.data;
+
+            if (data.status === 'stream' || data.status === 'redirect') {
+                return {
+                    downloadUrl: data.url,
+                    downloadOptions: [{
+                        quality: '720p',
+                        url: data.url,
+                        type: 'video',
+                        format: 'mp4',
+                        size: 'Unknown'
+                    }],
+                    quality: '720p'
+                };
+            } else if (data.status === 'picker' && data.picker && data.picker.length > 0) {
+                // Multiple options available
+                const options = data.picker.map((item, index) => ({
+                    quality: item.type === 'video' ? '720p' : 'Audio',
+                    url: item.url,
+                    type: item.type || 'video',
+                    format: 'mp4',
+                    size: 'Unknown'
+                }));
+
+                return {
+                    downloadUrl: data.picker[0].url,
+                    downloadOptions: options,
+                    quality: '720p'
+                };
+            }
+        }
+    } catch (e) {
+        console.log('[YouTube] Cobalt API error:', e.response?.data || e.message);
+    }
+
+    return null;
 }
 
 /**
- * Get video info via oEmbed API (fallback for metadata only)
+ * Alternative download method using SaveFrom-style API
+ */
+async function getAlternativeDownload(url, videoId) {
+    try {
+        // Try ssyoutube API
+        const response = await axios.get(`https://api.vevioz.com/api/button/mp4/${videoId}`, {
+            timeout: 15000,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+        });
+
+        if (response.data) {
+            // Parse the HTML response for download links
+            const html = response.data;
+            const linkMatch = html.match(/href="(https:\/\/[^"]+\.mp4[^"]*)"/);
+
+            if (linkMatch && linkMatch[1]) {
+                return {
+                    downloadUrl: linkMatch[1],
+                    downloadOptions: [{
+                        quality: '720p',
+                        url: linkMatch[1],
+                        type: 'video',
+                        format: 'mp4',
+                        size: 'Unknown'
+                    }],
+                    quality: '720p'
+                };
+            }
+        }
+    } catch (e) {
+        console.log('[YouTube] Alternative API error:', e.message);
+    }
+
+    // Try another alternative - y2meta
+    try {
+        const response = await axios.post('https://api.y2meta.app/api/getDownloadUrls', {
+            url: url,
+            type: 'video'
+        }, {
+            timeout: 15000,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.data && response.data.data) {
+            const formats = response.data.data;
+            if (formats.video && formats.video.length > 0) {
+                const best = formats.video[0];
+                return {
+                    downloadUrl: best.url,
+                    downloadOptions: formats.video.slice(0, 3).map(f => ({
+                        quality: f.quality || '720p',
+                        url: f.url,
+                        type: 'video',
+                        format: 'mp4',
+                        size: f.size || 'Unknown'
+                    })),
+                    quality: best.quality || '720p'
+                };
+            }
+        }
+    } catch (e) {
+        console.log('[YouTube] Y2Meta API error:', e.message);
+    }
+
+    return null;
+}
+
+/**
+ * Get video info via oEmbed API
  */
 async function getVideoInfoOEmbed(url, videoId) {
     const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
@@ -183,14 +213,14 @@ async function getVideoInfoOEmbed(url, videoId) {
  */
 function formatResponse(data, videoId, url) {
     return {
-        title: data.title || 'YouTube Video',
-        thumbnail: data.thumbnail || `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
-        duration: data.duration || '00:00',
-        author: data.author || 'Unknown',
-        views: data.views || '0',
-        downloadUrl: data.downloadUrl || null,
-        downloadOptions: data.downloadOptions || [],
-        quality: data.quality || 'HD',
+        title: data?.title || 'YouTube Video',
+        thumbnail: data?.thumbnail || `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
+        duration: data?.duration || '00:00',
+        author: data?.author || 'Unknown',
+        views: data?.views || '0',
+        downloadUrl: data?.downloadUrl || null,
+        downloadOptions: data?.downloadOptions || [],
+        quality: data?.quality || 'HD',
         source: 'YouTube',
         isShort: url.includes('/shorts/'),
         videoId: videoId
@@ -223,40 +253,6 @@ function extractVideoId(url) {
     if (embedMatch) return embedMatch[1];
 
     return null;
-}
-
-/**
- * Format duration from seconds
- */
-function formatDuration(seconds) {
-    if (!seconds) return '00:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-}
-
-/**
- * Format view count
- */
-function formatViews(views) {
-    if (!views) return '0';
-    if (views >= 1000000) {
-        return (views / 1000000).toFixed(1) + 'M';
-    } else if (views >= 1000) {
-        return (views / 1000).toFixed(1) + 'K';
-    }
-    return views.toString();
-}
-
-/**
- * Format bytes to human readable
- */
-function formatBytes(bytes) {
-    if (!bytes || bytes === 0) return 'Unknown';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 }
 
 module.exports = {
