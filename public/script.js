@@ -1,6 +1,7 @@
 // Configuration
 const API_URL = '/api/download';
 const FACEBOOK_API_URL = '/api/facebook/download';
+const YOUTUBE_API_URL = '/api/youtube/download';
 
 // DOM Elements
 const downloadForm = document.getElementById('downloadForm');
@@ -126,6 +127,7 @@ downloadForm.addEventListener('submit', handleDownload);
 function detectPlatform(url) {
     if (/tiktok\.com/i.test(url)) return 'tiktok';
     if (/facebook\.com|fb\.watch|fb\.com|fbwat\.ch/i.test(url)) return 'facebook';
+    if (/youtube\.com|youtu\.be/i.test(url)) return 'youtube';
     return null;
 }
 
@@ -170,7 +172,9 @@ async function handleDownload(e) {
 
     try {
         // Use correct API based on platform
-        const apiUrl = platform === 'facebook' ? FACEBOOK_API_URL : API_URL;
+        let apiUrl = API_URL;
+        if (platform === 'facebook') apiUrl = FACEBOOK_API_URL;
+        else if (platform === 'youtube') apiUrl = YOUTUBE_API_URL;
         console.log(`📡 Calling ${platform} API:`, apiUrl);
 
         const response = await fetch(apiUrl, {
@@ -237,15 +241,50 @@ function showVideoPreview(data) {
     clearPreview();
 
     const isFacebook = data.platform === 'facebook';
-    const platformLabel = isFacebook ? 'Facebook' : 'TikTok';
-    const platformIcon = isFacebook ? '📘' : '🎵';
+    const isYouTube = data.source === 'YouTube' || data.isShort !== undefined;
+    const platformLabel = isYouTube ? 'YouTube' : (isFacebook ? 'Facebook' : 'TikTok');
+    const platformIcon = isYouTube ? '📺' : (isFacebook ? '📘' : '🎵');
 
     const langData = window.translations[currentLang];
 
     // Build download buttons based on platform
     let downloadButtons = '';
 
-    if (isFacebook) {
+    if (isYouTube) {
+        // YouTube: Show available download options
+        if (data.downloadOptions && data.downloadOptions.length > 0) {
+            downloadButtons = data.downloadOptions.map(opt => {
+                const isAudio = opt.type === 'audio';
+                const btnStyle = isAudio ? 'background: var(--gradient-secondary);' : 'background: linear-gradient(135deg, #FF0000 0%, #CC0000 100%);';
+                const label = isAudio ? `🎵 ${opt.quality} MP3` : `📥 ${opt.quality} ${opt.format.toUpperCase()}`;
+                return `
+                    <button onclick="downloadVideoDirect('${encodeURIComponent(opt.url)}', '${opt.type}')" class="download-video-btn" style="${btnStyle}">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M10 13L5 8H8V2H12V8H15L10 13Z" fill="currentColor"/>
+                            <path d="M2 16H18V18H2V16Z" fill="currentColor"/>
+                        </svg>
+                        ${label}
+                    </button>
+                `;
+            }).join('');
+        } else if (data.downloadUrl) {
+            // Fallback to single download button
+            downloadButtons = `
+                <button onclick="downloadVideoDirect('${encodeURIComponent(data.downloadUrl)}', 'video')" class="download-video-btn" style="background: linear-gradient(135deg, #FF0000 0%, #CC0000 100%);">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M10 13L5 8H8V2H12V8H15L10 13Z" fill="currentColor"/>
+                        <path d="M2 16H18V18H2V16Z" fill="currentColor"/>
+                    </svg>
+                    ${langData['download_hd'] || 'Tải Video HD'}
+                </button>
+            `;
+        } else {
+            // No download options - show error message
+            downloadButtons = `
+                <p style="color: var(--text-secondary); text-align: center; padding: 10px;">⚠️ Video này hiện không thể tải. Vui lòng thử video khác.</p>
+            `;
+        }
+    } else if (isFacebook) {
         // Facebook: Show HD and SD options
         const hdUrl = data.videoHD || data.videoNoWatermark || data.videoUrl;
         const sdUrl = data.videoSD || data.videoUrl;
@@ -298,6 +337,30 @@ function showVideoPreview(data) {
         `;
     }
 
+    // Handle author display for different platforms
+    let authorDisplay = '';
+    if (isYouTube) {
+        // YouTube returns author as string
+        const authorName = typeof data.author === 'string' ? data.author : (data.author?.name || 'Unknown');
+        authorDisplay = `<p class="video-author">👤 ${escapeHtml(authorName)} ${data.duration ? `• ⏱️ ${data.duration}` : ''} ${data.views ? `• 👁️ ${data.views} views` : ''}</p>`;
+    } else if (data.author && data.author.username) {
+        // TikTok/Facebook format
+        authorDisplay = `<p class="video-author">@${escapeHtml(data.author.username)} • ${escapeHtml(data.author.nickname || '')}</p>`;
+    }
+
+    // Stats display (TikTok/Facebook only)
+    let statsDisplay = '';
+    if (!isYouTube && data.stats && (data.stats.likes || data.stats.plays)) {
+        statsDisplay = `
+            <div class="video-stats">
+                <span>❤️ ${formatNumber(data.stats.likes)}</span>
+                <span>💬 ${formatNumber(data.stats.comments)}</span>
+                <span>🔄 ${formatNumber(data.stats.shares)}</span>
+                <span>▶️ ${formatNumber(data.stats.plays)}</span>
+            </div>
+        `;
+    }
+
     const preview = document.createElement('div');
     preview.className = 'video-preview fade-in';
     preview.innerHTML = `
@@ -305,16 +368,9 @@ function showVideoPreview(data) {
             ${data.thumbnail ? `<img src="${data.thumbnail}" alt="Video thumbnail" class="video-thumbnail">` : ''}
             <div class="video-details">
                 <span class="platform-badge">${platformIcon} ${platformLabel}</span>
-                <h3 class="video-title">${escapeHtml(data.title)}</h3>
-                <p class="video-author">@${escapeHtml(data.author.username)} • ${escapeHtml(data.author.nickname)}</p>
-                ${data.stats && (data.stats.likes || data.stats.plays) ? `
-                    <div class="video-stats">
-                        <span>❤️ ${formatNumber(data.stats.likes)}</span>
-                        <span>💬 ${formatNumber(data.stats.comments)}</span>
-                        <span>🔄 ${formatNumber(data.stats.shares)}</span>
-                        <span>▶️ ${formatNumber(data.stats.plays)}</span>
-                    </div>
-                ` : ''}
+                <h3 class="video-title">${escapeHtml(data.title || 'Untitled Video')}</h3>
+                ${authorDisplay}
+                ${statsDisplay}
             </div>
         </div>
         <div class="download-actions">
