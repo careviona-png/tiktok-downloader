@@ -64,6 +64,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// TikTok to MP3 SEO landing page
+app.get('/convert-tiktok-to-mp3', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'convert-tiktok-to-mp3.html'));
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err.message);
