@@ -1,7 +1,8 @@
+const { spawn } = require('child_process');
 const axios = require('axios');
 
 /**
- * Extract YouTube video/shorts information using multiple methods
+ * Extract YouTube video/shorts information using yt-dlp binary
  * @param {string} url - YouTube URL
  * @returns {Promise<Object>} - Video metadata
  */
@@ -15,56 +16,28 @@ async function getYoutubeInfo(url) {
 
     console.log('[YouTube] Video ID:', videoId);
 
-    // Try multiple methods
-    let videoData = null;
-    let lastError = null;
-
-    // Method 1: RapidAPI YouTubeToMP3 (free tier available)
     try {
-        videoData = await getVideoViaRapidAPI(videoId);
-        if (videoData && videoData.downloadUrl) {
-            console.log('[YouTube] Got video via RapidAPI');
-            return formatResponse(videoData, videoId, url);
+        // Use yt-dlp to get video info
+        const info = await getYtdlpInfo(url);
+
+        if (info && info.title) {
+            console.log('[YouTube] Got info via yt-dlp:', info.title);
+            return formatResponse(info, videoId, url);
         }
     } catch (e) {
-        console.log('[YouTube] RapidAPI failed:', e.message);
-        lastError = e;
+        console.log('[YouTube] yt-dlp failed:', e.message);
     }
 
-    // Method 2: Try Y2mate-style API
+    // Fallback to oEmbed for basic metadata
     try {
-        videoData = await getVideoViaY2mate(videoId, url);
-        if (videoData && videoData.downloadUrl) {
-            console.log('[YouTube] Got video via Y2mate');
-            return formatResponse(videoData, videoId, url);
-        }
-    } catch (e) {
-        console.log('[YouTube] Y2mate failed:', e.message);
-        lastError = e;
-    }
-
-    // Method 3: Try invidious API (privacy-focused YouTube frontend)
-    try {
-        videoData = await getVideoViaInvidious(videoId);
-        if (videoData && videoData.downloadUrl) {
-            console.log('[YouTube] Got video via Invidious');
-            return formatResponse(videoData, videoId, url);
-        }
-    } catch (e) {
-        console.log('[YouTube] Invidious failed:', e.message);
-        lastError = e;
-    }
-
-    // Method 4: Try basic oEmbed for metadata only
-    try {
-        videoData = await getVideoInfoOEmbed(url, videoId);
+        const oembedData = await getVideoInfoOEmbed(url, videoId);
         console.log('[YouTube] Got metadata via oEmbed (no download URL)');
-        return formatResponse(videoData || {}, videoId, url);
+        return formatResponse(oembedData || {}, videoId, url);
     } catch (e) {
         console.log('[YouTube] oEmbed failed:', e.message);
     }
 
-    // If all methods fail, return basic info
+    // Return basic info with thumbnail
     return formatResponse({
         title: 'YouTube Video',
         thumbnail: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
@@ -73,151 +46,116 @@ async function getYoutubeInfo(url) {
 }
 
 /**
- * Try RapidAPI YouTube service
+ * Get video info using yt-dlp binary
  */
-async function getVideoViaRapidAPI(videoId) {
-    // Using a public YouTube info endpoint
-    const response = await axios.get(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`, {
-        timeout: 10000,
-        headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        }
-    });
+function getYtdlpInfo(url) {
+    return new Promise((resolve, reject) => {
+        const args = [
+            '--dump-json',
+            '--no-playlist',
+            '--no-warnings',
+            '-f', 'best[ext=mp4]/best',
+            url
+        ];
 
-    if (response.data) {
-        return {
-            title: response.data.title,
-            author: response.data.author_name,
-            thumbnail: response.data.thumbnail_url
-        };
-    }
-    return null;
-}
+        console.log('[YouTube] Running yt-dlp with args:', args.join(' '));
 
-/**
- * Try Y2mate-style conversion API
- */
-async function getVideoViaY2mate(videoId, originalUrl) {
-    // Y2mate API endpoint
-    const analyzeUrl = 'https://www.y2mate.com/mates/analyzeV2/ajax';
+        const ytdlp = spawn('yt-dlp', args, {
+            timeout: 60000 // 60 second timeout
+        });
 
-    try {
-        const response = await axios.post(analyzeUrl,
-            `k_query=${encodeURIComponent(originalUrl)}&k_page=home&hl=en&q_auto=0`,
-            {
-                timeout: 15000,
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                    'Origin': 'https://www.y2mate.com',
-                    'Referer': 'https://www.y2mate.com/'
-                }
-            }
-        );
+        let stdout = '';
+        let stderr = '';
 
-        if (response.data && response.data.status === 'ok') {
-            const data = response.data;
-            const formats = data.links?.mp4 || {};
+        ytdlp.stdout.on('data', (data) => {
+            stdout += data.toString();
+        });
 
-            // Find best quality
-            const qualities = ['1080', '720', '480', '360'];
-            let bestFormat = null;
-            for (const q of qualities) {
-                if (formats[q]) {
-                    bestFormat = formats[q];
-                    break;
-                }
-            }
+        ytdlp.stderr.on('data', (data) => {
+            stderr += data.toString();
+        });
 
-            if (bestFormat) {
-                // Get conversion URL
-                const convertResponse = await axios.post('https://www.y2mate.com/mates/convertV2/index',
-                    `vid=${data.vid}&k=${bestFormat.k}`,
-                    {
-                        timeout: 20000,
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                            'Origin': 'https://www.y2mate.com'
+        ytdlp.on('close', (code) => {
+            if (code === 0 && stdout) {
+                try {
+                    const info = JSON.parse(stdout);
+
+                    // Build download options from formats
+                    const downloadOptions = [];
+                    const formats = info.formats || [];
+
+                    // Find combined formats (video + audio)
+                    const combinedFormats = formats.filter(f =>
+                        f.vcodec && f.vcodec !== 'none' &&
+                        f.acodec && f.acodec !== 'none' &&
+                        f.url
+                    ).sort((a, b) => (b.height || 0) - (a.height || 0));
+
+                    // Add unique qualities
+                    const addedQualities = new Set();
+                    combinedFormats.forEach(f => {
+                        const quality = f.height ? `${f.height}p` : 'Auto';
+                        if (!addedQualities.has(quality) && downloadOptions.length < 3) {
+                            addedQualities.add(quality);
+                            downloadOptions.push({
+                                quality: quality,
+                                url: f.url,
+                                type: 'video',
+                                format: f.ext || 'mp4',
+                                size: f.filesize ? formatBytes(f.filesize) : 'Unknown'
+                            });
                         }
+                    });
+
+                    // Find audio formats
+                    const audioFormats = formats.filter(f =>
+                        f.acodec && f.acodec !== 'none' &&
+                        (!f.vcodec || f.vcodec === 'none') &&
+                        f.url
+                    ).sort((a, b) => (b.abr || 0) - (a.abr || 0));
+
+                    if (audioFormats.length > 0) {
+                        const bestAudio = audioFormats[0];
+                        downloadOptions.push({
+                            quality: bestAudio.abr ? `${Math.round(bestAudio.abr)}kbps` : 'Best',
+                            url: bestAudio.url,
+                            type: 'audio',
+                            format: bestAudio.ext || 'm4a',
+                            size: bestAudio.filesize ? formatBytes(bestAudio.filesize) : 'Unknown'
+                        });
                     }
-                );
 
-                if (convertResponse.data?.status === 'ok' && convertResponse.data?.dlink) {
-                    return {
-                        title: data.title,
-                        thumbnail: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
-                        downloadUrl: convertResponse.data.dlink,
-                        quality: bestFormat.q
-                    };
+                    // Get best download URL
+                    const bestFormat = combinedFormats[0];
+
+                    resolve({
+                        title: info.title,
+                        author: info.uploader || info.channel,
+                        thumbnail: info.thumbnail || `https://i.ytimg.com/vi/${info.id}/maxresdefault.jpg`,
+                        duration: formatDuration(info.duration),
+                        views: formatViews(info.view_count),
+                        downloadUrl: bestFormat ? bestFormat.url : info.url,
+                        downloadOptions: downloadOptions,
+                        quality: bestFormat ? (bestFormat.height ? `${bestFormat.height}p` : 'HD') : 'HD'
+                    });
+                } catch (parseError) {
+                    reject(new Error('Failed to parse yt-dlp output'));
                 }
+            } else {
+                console.log('[YouTube] yt-dlp stderr:', stderr);
+                reject(new Error(stderr || 'yt-dlp failed with code ' + code));
             }
-        }
-    } catch (e) {
-        console.log('[YouTube] Y2mate error:', e.message);
-    }
-    return null;
+        });
+
+        ytdlp.on('error', (err) => {
+            console.log('[YouTube] yt-dlp spawn error:', err.message);
+            reject(err);
+        });
+    });
 }
 
 /**
- * Try Invidious API (privacy-focused YouTube frontend)
- */
-async function getVideoViaInvidious(videoId) {
-    // List of Invidious instances
-    const instances = [
-        'https://invidious.snopyta.org',
-        'https://yewtu.be',
-        'https://vid.puffyan.us',
-        'https://invidious.kavin.rocks'
-    ];
-
-    for (const instance of instances) {
-        try {
-            const response = await axios.get(`${instance}/api/v1/videos/${videoId}`, {
-                timeout: 10000,
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                }
-            });
-
-            if (response.data) {
-                const data = response.data;
-
-                // Find format with both video and audio
-                const formats = data.formatStreams || [];
-                const adaptiveFormats = data.adaptiveFormats || [];
-
-                // Prefer combined formats
-                const combinedFormat = formats.find(f => f.quality && f.url) || formats[0];
-
-                if (combinedFormat && combinedFormat.url) {
-                    return {
-                        title: data.title,
-                        author: data.author,
-                        thumbnail: data.videoThumbnails?.[0]?.url || `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
-                        downloadUrl: combinedFormat.url,
-                        downloadOptions: formats.filter(f => f.url).map(f => ({
-                            quality: f.quality || f.qualityLabel || 'Auto',
-                            url: f.url,
-                            type: 'video',
-                            format: 'mp4'
-                        })),
-                        quality: combinedFormat.quality || 'HD',
-                        duration: formatDuration(data.lengthSeconds),
-                        views: formatViews(data.viewCount)
-                    };
-                }
-            }
-        } catch (e) {
-            console.log(`[YouTube] Invidious ${instance} failed:`, e.message);
-            continue;
-        }
-    }
-    return null;
-}
-
-/**
- * Get video info via oEmbed API
+ * Get video info via oEmbed API (fallback for metadata only)
  */
 async function getVideoInfoOEmbed(url, videoId) {
     const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
@@ -308,6 +246,17 @@ function formatViews(views) {
         return (views / 1000).toFixed(1) + 'K';
     }
     return views.toString();
+}
+
+/**
+ * Format bytes to human readable
+ */
+function formatBytes(bytes) {
+    if (!bytes || bytes === 0) return 'Unknown';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 }
 
 module.exports = {

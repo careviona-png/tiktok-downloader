@@ -2,7 +2,7 @@
 # This file configures the build environment for Railway
 
 [phases.setup]
-nixPkgs = ["nodejs_20", "ffmpeg-full"]
+nixPkgs = ["nodejs_20", "ffmpeg-full", "yt-dlp"]
 
 [phases.install]
 cmds = ["npm ci || npm install"]
