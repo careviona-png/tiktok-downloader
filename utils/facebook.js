@@ -4,7 +4,6 @@ const axios = require('axios');
 let facebookDownloader;
 try {
     const fbModule = require('@mrnima/facebook-downloader');
-    // The module exports { facebook } function
     facebookDownloader = fbModule.facebook || fbModule.fbdl || fbModule.default;
     console.log('[Facebook] Loaded @mrnima/facebook-downloader');
 } catch (e) {
@@ -17,30 +16,29 @@ try {
  * Supports regular videos, Reels, and share links
  */
 async function getFacebookVideo(url) {
-    console.log('🔍 Fetching Facebook video:', url);
+    console.log('🔍 Fetching Facebook video info for:', url);
 
-    // Normalize URL - handle /share/r/ format
-    const normalizedUrl = normalizeUrl(url);
-    console.log('📎 Normalized URL:', normalizedUrl);
+    // First, resolve any share/short links to get the real URL
+    let resolvedUrl = url;
+    try {
+        resolvedUrl = await resolveShortUrl(url);
+        console.log('📎 Resolved URL:', resolvedUrl);
+    } catch (e) {
+        console.log('[Facebook] Could not resolve URL, using original:', e.message);
+    }
 
     // Try primary method first
     if (facebookDownloader) {
         try {
-            const result = await facebookDownloader(normalizedUrl);
-            console.log('[Facebook] mrnima result:', JSON.stringify(result).substring(0, 200));
+            const result = await facebookDownloader(resolvedUrl);
+            console.log('[Facebook] mrnima result type:', typeof result);
 
             if (result) {
-                // Handle different response formats
                 let data;
-                if (result.result) {
-                    data = result.result;
-                } else if (result.hd || result.sd) {
-                    data = result;
-                } else if (result.data) {
-                    data = result.data;
-                } else {
-                    data = result;
-                }
+                if (result.result) data = result.result;
+                else if (result.hd || result.sd) data = result;
+                else if (result.data) data = result.data;
+                else data = result;
 
                 if (data.hd || data.sd || data.url) {
                     console.log('✅ Got Facebook video via mrnima');
@@ -59,7 +57,7 @@ async function getFacebookVideo(url) {
 
     // Fallback: Try with direct scraping
     try {
-        const data = await scrapeFacebookVideo(normalizedUrl);
+        const data = await scrapeFacebookVideo(resolvedUrl);
         if (data && (data.hd || data.sd)) {
             console.log('✅ Got Facebook video via scraping');
             return formatFacebookResponse(data);
@@ -68,9 +66,9 @@ async function getFacebookVideo(url) {
         console.log('[Facebook] Scraping failed:', e.message);
     }
 
-    // Try alternative API
+    // Try alternative APIs
     try {
-        const data = await getViaAlternativeAPI(normalizedUrl);
+        const data = await getViaAlternativeAPI(resolvedUrl);
         if (data && (data.hd || data.sd)) {
             console.log('✅ Got Facebook video via alternative API');
             return formatFacebookResponse(data);
@@ -79,26 +77,47 @@ async function getFacebookVideo(url) {
         console.log('[Facebook] Alternative API failed:', e.message);
     }
 
-    throw new Error('Không thể tải video Facebook. Vui lòng kiểm tra link và thử lại.');
+    throw new Error('Không thể tải video Facebook. Video có thể là private hoặc link không hợp lệ.');
 }
 
 /**
- * Normalize Facebook URL - convert share links to direct links
+ * Resolve short URLs and share links to get the actual Facebook URL
  */
-function normalizeUrl(url) {
-    // Handle /share/r/ format (Reels share links)
-    if (url.includes('/share/r/')) {
-        const match = url.match(/\/share\/r\/([a-zA-Z0-9]+)/);
-        if (match) {
-            return `https://www.facebook.com/reel/${match[1]}`;
-        }
-    }
+async function resolveShortUrl(url) {
+    // If it's a share link, follow redirects to get the real URL
+    if (url.includes('/share/') || url.includes('fb.watch') || url.includes('fbwat.ch')) {
+        try {
+            const response = await axios.head(url, {
+                maxRedirects: 5,
+                timeout: 10000,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                },
+                validateStatus: (status) => status < 400
+            });
 
-    // Handle /share/v/ format (Video share links)
-    if (url.includes('/share/v/')) {
-        const match = url.match(/\/share\/v\/([a-zA-Z0-9]+)/);
-        if (match) {
-            return `https://www.facebook.com/watch/?v=${match[1]}`;
+            // Get the final URL after redirects
+            if (response.request && response.request.res && response.request.res.responseUrl) {
+                return response.request.res.responseUrl;
+            }
+        } catch (e) {
+            // Try GET request instead
+            try {
+                const response = await axios.get(url, {
+                    maxRedirects: 5,
+                    timeout: 10000,
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                    }
+                });
+
+                // Extract real URL from response if available
+                if (response.request && response.request.res && response.request.res.responseUrl) {
+                    return response.request.res.responseUrl;
+                }
+            } catch (e2) {
+                console.log('[Facebook] Redirect resolution failed:', e2.message);
+            }
         }
     }
 
@@ -110,12 +129,12 @@ function normalizeUrl(url) {
  */
 async function scrapeFacebookVideo(url) {
     try {
+        // Use mobile user agent for better compatibility
         const response = await axios.get(url, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5',
-                'Cookie': 'locale=en_US;'
+                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5'
             },
             timeout: 15000,
             maxRedirects: 5
@@ -127,25 +146,27 @@ async function scrapeFacebookVideo(url) {
         let title = 'Facebook Video';
         let thumbnail = '';
 
-        // Try multiple patterns for HD video
-        const hdPatterns = [
+        // Try multiple patterns for video URLs
+        const videoPatterns = [
             /browser_native_hd_url":"([^"]+)"/,
             /playable_url_quality_hd":"([^"]+)"/,
             /"hd_src":"([^"]+)"/,
-            /hd_src_no_ratelimit":"([^"]+)"/
+            /hd_src_no_ratelimit":"([^"]+)"/,
+            /"video_url":"([^"]+)"/,
+            /contentUrl":"([^"]+\.mp4[^"]*)"/
         ];
 
-        for (const pattern of hdPatterns) {
+        for (const pattern of videoPatterns) {
             const match = html.match(pattern);
             if (match) {
                 try {
-                    hdUrl = JSON.parse(`"${match[1]}"`);
+                    const decoded = JSON.parse(`"${match[1]}"`);
+                    if (!hdUrl) hdUrl = decoded;
                     break;
                 } catch (e) { }
             }
         }
 
-        // Try multiple patterns for SD video
         const sdPatterns = [
             /browser_native_sd_url":"([^"]+)"/,
             /playable_url":"([^"]+)"/,
@@ -166,13 +187,21 @@ async function scrapeFacebookVideo(url) {
         // Get title
         const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/);
         if (titleMatch) {
-            title = titleMatch[1].replace(' | Facebook', '').replace(' - Facebook', '').trim();
+            title = titleMatch[1].replace(/\s*[\|•-]\s*Facebook.*$/i, '').trim();
         }
 
         // Get thumbnail
-        const thumbMatch = html.match(/og:image" content="([^"]+)"/);
-        if (thumbMatch) {
-            thumbnail = thumbMatch[1];
+        const thumbPatterns = [
+            /og:image" content="([^"]+)"/,
+            /twitter:image" content="([^"]+)"/,
+            /"thumbnailUrl":"([^"]+)"/
+        ];
+        for (const pattern of thumbPatterns) {
+            const match = html.match(pattern);
+            if (match) {
+                thumbnail = match[1];
+                break;
+            }
         }
 
         if (hdUrl || sdUrl) {
@@ -180,62 +209,36 @@ async function scrapeFacebookVideo(url) {
         }
 
     } catch (e) {
-        console.log('[Facebook] Scrape error:', e.message);
+        throw new Error(e.message);
     }
 
     return null;
 }
 
 /**
- * Try alternative Facebook video API
+ * Try alternative Facebook video APIs
  */
 async function getViaAlternativeAPI(url) {
-    // Try multiple alternative APIs
     const apis = [
         {
-            name: 'fdownloader',
+            name: 'rapidapi-fb',
             method: async () => {
-                const response = await axios.post('https://fdownloader.net/api/ajaxSearch',
-                    `q=${encodeURIComponent(url)}`,
-                    {
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                        },
-                        timeout: 15000
-                    }
-                );
-                if (response.data && response.data.links) {
-                    const links = response.data.links;
-                    return {
-                        title: response.data.title || 'Facebook Video',
-                        thumbnail: response.data.thumb || '',
-                        hd: links.find(l => l.quality === 'HD')?.url || '',
-                        sd: links.find(l => l.quality === 'SD')?.url || links[0]?.url || ''
-                    };
-                }
-                return null;
-            }
-        },
-        {
-            name: 'getfvid',
-            method: async () => {
-                const response = await axios.post('https://getfvid.com/api/bypass',
-                    { url: url },
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'User-Agent': 'Mozilla/5.0'
-                        },
-                        timeout: 15000
-                    }
-                );
-                if (response.data && (response.data.hd || response.data.sd)) {
+                // Try a basic fetch approach
+                const response = await axios.get(`https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}`, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    },
+                    timeout: 10000
+                });
+
+                const html = response.data;
+                const videoMatch = html.match(/data-video-url="([^"]+)"/);
+                if (videoMatch) {
                     return {
                         title: 'Facebook Video',
                         thumbnail: '',
-                        hd: response.data.hd || '',
-                        sd: response.data.sd || ''
+                        hd: videoMatch[1],
+                        sd: videoMatch[1]
                     };
                 }
                 return null;
@@ -246,7 +249,7 @@ async function getViaAlternativeAPI(url) {
     for (const api of apis) {
         try {
             const result = await api.method();
-            if (result) {
+            if (result && (result.hd || result.sd)) {
                 console.log(`[Facebook] ${api.name} succeeded`);
                 return result;
             }
