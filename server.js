@@ -51,9 +51,11 @@ app.use((req, res, next) => {
 });
 
 // API Routes - MUST come before static files
-app.use('/api', downloadRouter);
-app.use('/api', flipRouter);
+app.use('/api/download', downloadRouter);
+app.use('/api/flip', flipRouter);
+app.use('/api/audio', audioRouter);
 app.use('/api/facebook', facebookRouter);
+app.use('/api/youtube', youtubeRouter);
 
 
 // TikTok to MP3 SEO landing page
@@ -64,6 +66,11 @@ app.get('/convert-tiktok-to-mp3', (req, res) => {
 // Reverse Video SEO landing page
 app.get('/dao-nguoc-video-online', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dao-nguoc-video-online.html'));
+});
+
+// YouTube Shorts SEO landing page
+app.get('/tai-video-youtube-shorts-online', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'tai-video-youtube-shorts.html'));
 });
 
 // Serve static frontend files AFTER specific routes
