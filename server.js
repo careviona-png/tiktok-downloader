@@ -61,6 +61,11 @@ app.get('/convert-tiktok-to-mp3', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'convert-tiktok-to-mp3.html'));
 });
 
+// Reverse Video SEO landing page
+app.get('/dao-nguoc-video-online', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dao-nguoc-video-online.html'));
+});
+
 // Serve static frontend files AFTER specific routes
 app.use(express.static(path.join(__dirname, 'public')));
 
