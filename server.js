@@ -11,6 +11,14 @@ const PORT = process.env.PORT || 3000;
 
 
 // Middleware
+app.use((req, res, next) => {
+  const host = req.get('host');
+  if (host === 'tikdown.top') {
+    return res.redirect(301, `https://www.tikdown.top${req.originalUrl}`);
+  }
+  next();
+});
+
 app.use(cors({
   origin: process.env.FRONTEND_URL || '*',
   methods: ['GET', 'POST'],
