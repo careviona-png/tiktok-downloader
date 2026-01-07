@@ -56,17 +56,17 @@ app.use('/api', flipRouter);
 app.use('/api/facebook', facebookRouter);
 
 
-// Serve static frontend files AFTER API routes
+// TikTok to MP3 SEO landing page
+app.get('/convert-tiktok-to-mp3', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'convert-tiktok-to-mp3.html'));
+});
+
+// Serve static frontend files AFTER specific routes
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Homepage route
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// TikTok to MP3 SEO landing page
-app.get('/convert-tiktok-to-mp3', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'convert-tiktok-to-mp3.html'));
 });
 
 // Error handling middleware
