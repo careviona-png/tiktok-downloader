@@ -6,7 +6,9 @@ const cors = require('cors');
 const path = require('path');
 const downloadRouter = require('./routes/download');
 const flipRouter = require('./routes/flip');
+const audioRouter = require('./routes/audio');
 const facebookRouter = require('./routes/facebook');
+const youtubeRouter = require('./routes/youtube');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
