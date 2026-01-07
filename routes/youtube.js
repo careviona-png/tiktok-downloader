@@ -46,10 +46,10 @@ router.post('/download', youtubeRateLimiter, async (req, res) => {
     }
 
     try {
-        // Check cache first
+        // Check cache first - but only use if it has downloadUrl
         const cachedData = getCache(normalizedUrl);
-        if (cachedData) {
-            console.log('[YouTube] Serving from cache:', normalizedUrl);
+        if (cachedData && cachedData.downloadUrl) {
+            console.log('[YouTube] Serving from cache (with downloadUrl):', normalizedUrl);
             return res.json({
                 success: true,
                 data: cachedData,
@@ -57,13 +57,23 @@ router.post('/download', youtubeRateLimiter, async (req, res) => {
             });
         }
 
+        // If cached data exists but has no downloadUrl, skip cache and fetch fresh
+        if (cachedData && !cachedData.downloadUrl) {
+            console.log('[YouTube] Cached data has no downloadUrl, fetching fresh...');
+        }
+
         console.log('[YouTube] Processing new request:', normalizedUrl);
 
         // Get info from YouTube
         const videoData = await getYoutubeInfo(normalizedUrl);
 
-        // Cache the result for 30 minutes (shorter due to expiring URLs)
-        setCache(normalizedUrl, videoData, 30 * 60);
+        // Only cache if we got a valid downloadUrl
+        if (videoData && videoData.downloadUrl) {
+            console.log('[YouTube] Got downloadUrl, caching for 30 mins');
+            setCache(normalizedUrl, videoData, 30 * 60);
+        } else {
+            console.log('[YouTube] No downloadUrl, not caching');
+        }
 
         res.json({
             success: true,
