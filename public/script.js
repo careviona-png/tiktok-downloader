@@ -285,29 +285,22 @@ function showVideoPreview(data) {
             `;
         }
     } else if (isFacebook) {
-        // Facebook: Show HD and SD options
-        const hdUrl = data.videoHD || data.videoNoWatermark || data.videoUrl;
-        const sdUrl = data.videoSD || data.videoUrl;
+        // Facebook: Redirect to external download service (most reliable)
+        const originalUrl = videoUrlInput.value.trim();
+        const snapsaveUrl = `https://snapsave.app/vn?url=${encodeURIComponent(originalUrl)}`;
 
         downloadButtons = `
-            ${hdUrl ? `
-            <button onclick="downloadVideoDirect('${encodeURIComponent(hdUrl)}', 'video', 'facebook')" class="download-video-btn" style="background: linear-gradient(135deg, #1877F2 0%, #42A5F5 100%);">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M10 13L5 8H8V2H12V8H15L10 13Z" fill="currentColor"/>
-                    <path d="M2 16H18V18H2V16Z" fill="currentColor"/>
-                </svg>
-                ${langData['download_hd']}
-            </button>
-            ` : ''}
-            ${sdUrl ? `
-            <button onclick="downloadVideoDirect('${encodeURIComponent(sdUrl)}', 'video', 'facebook')" class="download-video-btn" style="background: linear-gradient(135deg, #4267B2 0%, #898F9C 100%);">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M10 13L5 8H8V2H12V8H15L10 13Z" fill="currentColor"/>
-                    <path d="M2 16H18V18H2V16Z" fill="currentColor"/>
-                </svg>
-                ${langData['download_sd']}
-            </button>
-            ` : ''}
+            <div style="text-align: center; padding: 15px;">
+                <p style="color: var(--text-secondary); margin-bottom: 15px;">📘 Facebook video không thể tải trực tiếp do giới hạn bảo mật.</p>
+                <button onclick="window.open('${snapsaveUrl}', '_blank')" class="download-video-btn" style="background: linear-gradient(135deg, #1877F2 0%, #42A5F5 100%); padding: 15px 30px;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M10 13L5 8H8V2H12V8H15L10 13Z" fill="currentColor"/>
+                        <path d="M2 16H18V18H2V16Z" fill="currentColor"/>
+                    </svg>
+                    🔗 Tải video qua SnapSave.app
+                </button>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 10px;">Sẽ mở trang SnapSave.app để tải video</p>
+            </div>
         `;
     } else {
         // TikTok: Original buttons
