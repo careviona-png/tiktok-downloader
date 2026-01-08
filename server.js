@@ -13,6 +13,8 @@ const youtubeRouter = require('./routes/youtube');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy - required for express-rate-limit behind reverse proxy (Railway, Heroku, etc.)
+app.set('trust proxy', 1);
 
 // Middleware
 app.use(helmet({

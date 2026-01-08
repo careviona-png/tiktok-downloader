@@ -53,9 +53,9 @@ router.post('/', async (req, res) => {
             });
         }
 
-        // Add download proxy URLs
-        videoData.downloadUrl = `/api/proxy-download?url=${encodeURIComponent(videoData.videoNoWatermark)}`;
-        videoData.audioDownloadUrl = `/api/proxy-download?url=${encodeURIComponent(videoData.audioUrl)}&type=audio`;
+        // Add download proxy URLs (route is mounted at /api/download, so full path is /api/download/proxy-download)
+        videoData.downloadUrl = `/api/download/proxy-download?url=${encodeURIComponent(videoData.videoNoWatermark)}`;
+        videoData.audioDownloadUrl = `/api/download/proxy-download?url=${encodeURIComponent(videoData.audioUrl)}&type=audio`;
 
         // Cache the result
         setCache(cacheKey, videoData);
@@ -143,13 +143,20 @@ router.get('/proxy-download', async (req, res) => {
             method: 'GET',
             url: url,
             responseType: 'stream',
-            timeout: 20000,
-            maxRedirects: 3,
-            maxContentLength: 100 * 1024 * 1024, // 100MB limit
+            timeout: 60000, // 60 seconds for slow TikWM servers
+            maxRedirects: 10,
+            maxContentLength: 200 * 1024 * 1024, // 200MB limit
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 'Accept': '*/*',
-                'Referer': 'https://www.tikwm.com/'
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept-Encoding': 'identity',
+                'Referer': 'https://www.tikwm.com/',
+                'Origin': 'https://www.tikwm.com',
+                'Connection': 'keep-alive',
+                'Sec-Fetch-Dest': 'video',
+                'Sec-Fetch-Mode': 'no-cors',
+                'Sec-Fetch-Site': 'same-origin'
             }
         });
 
@@ -165,11 +172,22 @@ router.get('/proxy-download', async (req, res) => {
             res.setHeader('Content-Length', response.headers['content-length']);
         }
 
+        console.log('✅ Streaming video, content-length:', response.headers['content-length']);
+
         // Pipe the video stream to response
         response.data.pipe(res);
 
     } catch (error) {
-        console.error('Proxy download error:', error.message);
+        console.error('❌ Proxy download error:', error.message);
+        console.error('❌ URL was:', req.query.url);
+
+        if (error.response) {
+            console.error('❌ Response status:', error.response.status);
+            console.error('❌ Response headers:', JSON.stringify(error.response.headers));
+        }
+        if (error.code) {
+            console.error('❌ Error code:', error.code);
+        }
 
         // Fallback: If proxy fails, try to redirect the user directly to the source
         if (req.query.url) {

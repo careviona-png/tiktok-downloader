@@ -431,7 +431,7 @@ function downloadVideoProxy(type = 'video') {
     }
 
     // Use backend proxy
-    const proxyUrl = `/api/proxy-download?url=${encodeURIComponent(url)}${type === 'audio' ? '&type=audio' : ''}`;
+    const proxyUrl = `/api/download/proxy-download?url=${encodeURIComponent(url)}${type === 'audio' ? '&type=audio' : ''}`;
 
     // Create temporary link
     const a = document.createElement('a');
@@ -475,7 +475,7 @@ async function downloadVideoDirect(encodedUrl, type = 'video', platform = 'tikto
     console.log('📥 Downloading:', platform, type, url);
 
     // Use backend proxy (relative URL) with source parameter
-    const proxyUrl = `/api/proxy-download?url=${encodeURIComponent(url)}&source=${platform}`;
+    const proxyUrl = `/api/download/proxy-download?url=${encodeURIComponent(url)}&source=${platform}`;
 
     // Show success modal after a short delay
     setTimeout(() => {

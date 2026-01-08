@@ -32,7 +32,7 @@ async function getTikTokVideo(url) {
         const makeAbsoluteUrl = (path) => {
             if (!path) return '';
             if (path.startsWith('http')) return path;
-            return `https://tikwm.com${path}`;
+            return `https://www.tikwm.com${path}`;
         };
 
         // Extract video data
