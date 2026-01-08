@@ -105,11 +105,17 @@ router.get('/proxy-download', async (req, res) => {
         try {
             const parsedUrl = new URL(url);
             const allowedDomains = [
-                'facebook.com', 'fbcdn.net', 'fna.fbcdn.net'
+                'facebook.com', 'fbcdn.net', 'fna.fbcdn.net', 'fb.com',
+                'cdninstagram.com', 'scontent.xx.fbcdn.net', 'video.xx.fbcdn.net',
+                'scontent-hkt1-1.xx.fbcdn.net', 'scontent-hkt1-2.xx.fbcdn.net'
             ];
 
+            // More flexible matching for fbcdn subdomains
             const isAllowed = allowedDomains.some(domain =>
-                parsedUrl.hostname === domain || parsedUrl.hostname.endsWith('.' + domain)
+                parsedUrl.hostname === domain ||
+                parsedUrl.hostname.endsWith('.' + domain) ||
+                parsedUrl.hostname.includes('.fbcdn.net') ||
+                parsedUrl.hostname.includes('.facebook.com')
             );
 
             if (!isAllowed) {
@@ -130,20 +136,22 @@ router.get('/proxy-download', async (req, res) => {
         }
         // --- END SECURITY ---
 
-        console.log(`🎬 Proxying Facebook ${quality || 'video'} download`);
+        console.log(`🎬 Proxying Facebook ${quality || 'video'} download:`, url);
 
         // Stream the video through our server
         const response = await axios({
             method: 'GET',
             url: url,
             responseType: 'stream',
-            timeout: 30000,
-            maxRedirects: 3,
-            maxContentLength: 200 * 1024 * 1024, // 200MB limit for FB high quality
+            timeout: 60000, // 60 seconds for large FB videos
+            maxRedirects: 10,
+            maxContentLength: 500 * 1024 * 1024, // 500MB limit for FB high quality
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 'Accept': '*/*',
-                'Referer': 'https://www.facebook.com/'
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Referer': 'https://www.facebook.com/',
+                'Origin': 'https://www.facebook.com'
             }
         });
 

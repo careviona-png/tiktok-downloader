@@ -474,8 +474,17 @@ async function downloadVideoDirect(encodedUrl, type = 'video', platform = 'tikto
 
     console.log('📥 Downloading:', platform, type, url);
 
-    // Use backend proxy (relative URL) with source parameter
-    const proxyUrl = `/api/download/proxy-download?url=${encodeURIComponent(url)}&source=${platform}`;
+    // Use platform-specific proxy endpoint
+    let proxyUrl;
+    if (platform === 'facebook') {
+        proxyUrl = `/api/facebook/proxy-download?url=${encodeURIComponent(url)}&quality=hd`;
+    } else if (platform === 'youtube') {
+        // YouTube uses direct links, no proxy needed
+        proxyUrl = url;
+    } else {
+        // TikTok and others use download proxy
+        proxyUrl = `/api/download/proxy-download?url=${encodeURIComponent(url)}&source=${platform}`;
+    }
 
     // Show success modal after a short delay
     setTimeout(() => {
