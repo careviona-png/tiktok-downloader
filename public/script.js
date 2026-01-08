@@ -477,7 +477,15 @@ async function downloadVideoDirect(encodedUrl, type = 'video', platform = 'tikto
     // Use platform-specific proxy endpoint
     let proxyUrl;
     if (platform === 'facebook') {
-        proxyUrl = `/api/facebook/proxy-download?url=${encodeURIComponent(url)}&quality=hd`;
+        // Facebook CDN URLs have security hashes - must open directly, cannot proxy
+        console.log('📥 Facebook: Opening direct download link');
+        window.open(url, '_blank');
+        const successMsg = currentLang === 'vi' ? '🎉 Đang mở trang tải xuống...' : '🎉 Opening download page...';
+        showMessage(successMsg, 'success');
+        setTimeout(() => {
+            showSuccessModal();
+        }, 1500);
+        return;
     } else if (platform === 'youtube') {
         // YouTube uses direct links, no proxy needed
         proxyUrl = url;
