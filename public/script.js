@@ -279,9 +279,17 @@ function showVideoPreview(data) {
                 </button>
             `;
         } else {
-            // No download options - show error message
+            // No download options from API - redirect to YTSave
+            const originalUrl = videoUrlInput.value.trim();
+            const ytsaveUrl = `https://ytsave.to/vi2/?url=${encodeURIComponent(originalUrl)}`;
             downloadButtons = `
-                <p style="color: var(--text-secondary); text-align: center; padding: 10px;">⚠️ Video này hiện không thể tải. Vui lòng thử video khác.</p>
+                <button onclick="window.open('${ytsaveUrl}', '_blank')" class="download-video-btn" style="background: linear-gradient(135deg, #FF0000 0%, #CC0000 100%); padding: 15px 30px;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M10 13L5 8H8V2H12V8H15L10 13Z" fill="currentColor"/>
+                        <path d="M2 16H18V18H2V16Z" fill="currentColor"/>
+                    </svg>
+                    🔗 Tải video qua YTSave.to
+                </button>
             `;
         }
     } else if (isFacebook) {
