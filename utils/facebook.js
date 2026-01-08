@@ -2,7 +2,9 @@ const axios = require('axios');
 
 /**
  * Get Facebook video info using FSave.net proxy API
- * This is the most reliable method for Facebook video downloads
+ * FSave uses a 2-step process:
+ * 1. Get mediaItems with mediaUrl references
+ * 2. Process each mediaUrl to get actual fileUrl
  */
 async function getFacebookVideo(url) {
     console.log('🔍 Fetching Facebook video info for:', url);
@@ -42,17 +44,6 @@ async function getFacebookVideo(url) {
         }
     }
 
-    // Method 3: Alternative - fdown.net
-    try {
-        videoData = await getFDownVideo(resolvedUrl);
-        if (videoData && (videoData.hd || videoData.sd)) {
-            console.log('✅ Got Facebook video via fdown.net');
-            return formatFacebookResponse(videoData);
-        }
-    } catch (e) {
-        console.log('[Facebook] fdown.net failed:', e.message);
-    }
-
     throw new Error('Không thể tải video Facebook. Video có thể là private hoặc link không hợp lệ.');
 }
 
@@ -82,12 +73,15 @@ async function resolveShortUrl(url) {
 }
 
 /**
- * FSave.net proxy API - Most reliable for Facebook
+ * FSave.net proxy API - 2-step process
+ * Step 1: Get mediaItems
+ * Step 2: Process each to get actual fileUrl
  */
 async function getFSaveVideo(url) {
     try {
-        console.log('[Facebook] Calling FSave.net API...');
+        console.log('[Facebook] Step 1: Calling FSave.net API...');
 
+        // Step 1: Get media items
         const response = await axios.post('https://fsave.net/proxy.php',
             `url=${encodeURIComponent(url)}`,
             {
@@ -98,19 +92,16 @@ async function getFSaveVideo(url) {
                     'X-Requested-With': 'XMLHttpRequest',
                     'Referer': 'https://fsave.net/vi',
                     'Origin': 'https://fsave.net',
-                    'Accept': 'application/json, text/javascript, */*; q=0.01',
-                    'Accept-Language': 'en-US,en;q=0.9,vi;q=0.8'
+                    'Accept': 'application/json, text/javascript, */*; q=0.01'
                 }
             }
         );
-
-        console.log('[Facebook] FSave response status:', response.status);
 
         if (response.data && response.data.api) {
             const api = response.data.api;
 
             if (api.status === 'OK' && api.mediaItems && api.mediaItems.length > 0) {
-                console.log('[Facebook] FSave found', api.mediaItems.length, 'media items');
+                console.log('[Facebook] Found', api.mediaItems.length, 'media items');
 
                 // Sort by quality - prefer HD
                 const sortedItems = api.mediaItems.sort((a, b) => {
@@ -120,31 +111,42 @@ async function getFSaveVideo(url) {
                     return bOrder - aOrder;
                 });
 
-                // Get best HD and SD
+                // Get best HD and SD items
                 const hdItem = sortedItems.find(item =>
                     item.mediaQuality === 'HD' ||
                     ['1080p', '720p', 'FHD'].includes(item.mediaRes)
                 );
                 const sdItem = sortedItems.find(item =>
                     item.mediaQuality === 'SD' ||
-                    ['480p', '360p'].includes(item.mediaRes)
+                    ['480p', '360p', '240p'].includes(item.mediaRes)
                 ) || sortedItems[sortedItems.length - 1];
 
-                // Get download URLs - might need second API call
-                let hdUrl = hdItem ? await getDownloadUrl(hdItem.mediaUrl) : null;
-                let sdUrl = sdItem ? await getDownloadUrl(sdItem.mediaUrl) : null;
+                // Step 2: Get actual download URLs for HD and SD
+                let hdUrl = null;
+                let sdUrl = null;
 
-                // If getDownloadUrl didn't return proper URL, use mediaUrl directly
-                if (!hdUrl && hdItem) hdUrl = hdItem.mediaUrl;
-                if (!sdUrl && sdItem) sdUrl = sdItem.mediaUrl;
+                if (hdItem) {
+                    console.log('[Facebook] Step 2: Getting HD download URL...');
+                    hdUrl = await getActualDownloadUrl(hdItem.mediaUrl);
+                }
 
-                return {
-                    title: api.title || 'Facebook Video',
-                    thumbnail: api.avatar || '',
-                    hd: hdUrl,
-                    sd: sdUrl || hdUrl,
-                    mediaItems: sortedItems // Keep all items for UI
-                };
+                if (sdItem && sdItem !== hdItem) {
+                    console.log('[Facebook] Step 2: Getting SD download URL...');
+                    sdUrl = await getActualDownloadUrl(sdItem.mediaUrl);
+                }
+
+                // Fallback: use HD as SD if SD not available
+                if (!sdUrl) sdUrl = hdUrl;
+                if (!hdUrl) hdUrl = sdUrl;
+
+                if (hdUrl || sdUrl) {
+                    return {
+                        title: api.title || 'Facebook Video',
+                        thumbnail: api.avatar || '',
+                        hd: hdUrl,
+                        sd: sdUrl
+                    };
+                }
             } else if (api.status === 'ERROR') {
                 console.log('[Facebook] FSave error:', api.message);
             }
@@ -157,77 +159,73 @@ async function getFSaveVideo(url) {
 }
 
 /**
- * Get actual download URL from FSave (if needed for rendering)
+ * Step 2: Get actual download URL from FSave
+ * Poll until processing is complete
  */
-async function getDownloadUrl(mediaUrl) {
-    // If it's already a direct URL, return it
-    if (mediaUrl && (mediaUrl.startsWith('http://') || mediaUrl.startsWith('https://'))) {
+async function getActualDownloadUrl(mediaUrl) {
+    if (!mediaUrl) return null;
+
+    // If it's already a direct download URL, return it
+    if (mediaUrl.includes('.mp4') && !mediaUrl.includes('videoProcess')) {
         return mediaUrl;
     }
 
-    // If it's an internal reference, try to get the actual download link
     try {
-        const response = await axios.post('https://fsave.net/proxy.php',
-            `url=${encodeURIComponent(mediaUrl)}`,
-            {
-                timeout: 20000,
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Referer': 'https://fsave.net/vi',
-                    'Origin': 'https://fsave.net'
+        // Call FSave to process and get actual download URL
+        let attempts = 0;
+        const maxAttempts = 15; // 30 seconds max
+
+        while (attempts < maxAttempts) {
+            const response = await axios.post('https://fsave.net/proxy.php',
+                `url=${encodeURIComponent(mediaUrl)}`,
+                {
+                    timeout: 20000,
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Referer': 'https://fsave.net/vi',
+                        'Origin': 'https://fsave.net'
+                    }
+                }
+            );
+
+            if (response.data && response.data.api) {
+                const api = response.data.api;
+
+                // Check if processing is complete
+                if (api.percent === 'Completed' && api.fileUrl) {
+                    console.log('[Facebook] Got fileUrl:', api.fileUrl.substring(0, 80) + '...');
+                    return api.fileUrl;
+                }
+
+                // If still processing, wait and retry
+                if (api.percent && api.percent !== 'Completed') {
+                    console.log('[Facebook] Processing:', api.percent);
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    attempts++;
+                    continue;
+                }
+
+                // If got a direct URL in response
+                if (api.fileUrl) {
+                    return api.fileUrl;
                 }
             }
-        );
 
-        if (response.data && response.data.api && response.data.api.fileUrl) {
-            return response.data.api.fileUrl;
+            break;
         }
+
+        // If polling failed, try to use the mediaUrl directly
+        // It might work if it's from mcontent.app
+        if (mediaUrl.includes('mcontent.app')) {
+            return mediaUrl;
+        }
+
     } catch (e) {
-        console.log('[Facebook] getDownloadUrl failed:', e.message);
+        console.log('[Facebook] getActualDownloadUrl failed:', e.message);
     }
 
-    return null;
-}
-
-/**
- * Alternative: fdown.net API
- */
-async function getFDownVideo(url) {
-    try {
-        const response = await axios.post('https://fdown.net/download.php',
-            `URLz=${encodeURIComponent(url)}`,
-            {
-                timeout: 20000,
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'Referer': 'https://fdown.net/',
-                    'Origin': 'https://fdown.net'
-                }
-            }
-        );
-
-        const html = response.data;
-
-        // Extract download links
-        const hdMatch = html.match(/id="hdlink"[^>]*href="([^"]+)"/i) ||
-            html.match(/quality:\s*HD[^>]*href="([^"]+)"/i);
-        const sdMatch = html.match(/id="sdlink"[^>]*href="([^"]+)"/i) ||
-            html.match(/quality:\s*SD[^>]*href="([^"]+)"/i);
-
-        if (hdMatch || sdMatch) {
-            return {
-                title: 'Facebook Video',
-                thumbnail: '',
-                hd: hdMatch ? hdMatch[1] : null,
-                sd: sdMatch ? sdMatch[1] : null
-            };
-        }
-    } catch (e) {
-        throw new Error(e.message);
-    }
     return null;
 }
 
@@ -251,7 +249,6 @@ function formatFacebookResponse(data) {
         videoHD: data.hd || '',
         videoSD: data.sd || '',
         audioUrl: '',
-        mediaItems: data.mediaItems || [],
         stats: { plays: 0, likes: 0, comments: 0, shares: 0 }
     };
 }
