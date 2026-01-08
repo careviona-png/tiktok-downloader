@@ -12,8 +12,8 @@ const flipLimiter = rateLimit({
     message: { success: false, error: 'Daily/Hourly flip limit reached. Please try again later.' }
 });
 
-// POST /api/flip - Flip video horizontally
-router.post('/flip', flipLimiter, async (req, res) => {
+// POST /api/flip - Flip video horizontally (route mounted at /api/flip)
+router.post('/', flipLimiter, async (req, res) => {
     try {
         const { videoUrl } = req.body;
 

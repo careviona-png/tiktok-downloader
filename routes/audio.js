@@ -4,8 +4,8 @@ const { extractAudio, downloadVideo } = require('../utils/videoFlipper');
 const path = require('path');
 const fs = require('fs');
 
-// POST /api/convert-mp3 - Convert video to MP3
-router.post('/convert-mp3', async (req, res) => {
+// POST /api/audio - Convert video to MP3 (route mounted at /api/audio)
+router.post('/', async (req, res) => {
     let downloadedPath = null;
     let audioPath = null;
 

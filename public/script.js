@@ -505,7 +505,7 @@ async function processAudio(url) {
     showMessage(extractMsg, 'info');
 
     try {
-        const response = await fetch('/api/convert-mp3', {
+        const response = await fetch('/api/audio', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

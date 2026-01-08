@@ -29,40 +29,52 @@ async function getYoutubeInfo(url) {
     // Try multiple APIs for download URL
     let downloadData = null;
 
-    // Method 1: Try Cobalt API (correct URL)
+    // Method 1: Try y2mate API
     try {
-        downloadData = await getCobaltDownload(url);
+        downloadData = await getY2MateDownload(videoId);
         if (downloadData && downloadData.downloadUrl) {
-            console.log('[YouTube] Got Cobalt download URL: YES');
+            console.log('[YouTube] Y2Mate download URL: YES');
             return formatResponse({ ...metadata, ...downloadData }, videoId, url);
         }
-        console.log('[YouTube] Got Cobalt download URL: NO');
+        console.log('[YouTube] Y2Mate download URL: NO');
     } catch (e) {
-        console.log('[YouTube] Cobalt API error:', e.message);
+        console.log('[YouTube] Y2Mate API error:', e.message);
     }
 
-    // Method 2: Try SaveTube API
+    // Method 2: Try loader.to API
     try {
-        downloadData = await getSaveTubeDownload(videoId);
+        downloadData = await getLoaderToDownload(videoId);
         if (downloadData && downloadData.downloadUrl) {
-            console.log('[YouTube] Got SaveTube download URL: YES');
+            console.log('[YouTube] loader.to download URL: YES');
             return formatResponse({ ...metadata, ...downloadData }, videoId, url);
         }
-        console.log('[YouTube] Got SaveTube download URL: NO');
+        console.log('[YouTube] loader.to download URL: NO');
     } catch (e) {
-        console.log('[YouTube] SaveTube API error:', e.message);
+        console.log('[YouTube] loader.to API error:', e.message);
     }
 
-    // Method 3: Try direct YouTube embed extraction
+    // Method 3: Try yt1s API
     try {
-        downloadData = await getYouTubeEmbedDownload(videoId);
+        downloadData = await getYt1sDownload(videoId);
         if (downloadData && downloadData.downloadUrl) {
-            console.log('[YouTube] Got embed download URL: YES');
+            console.log('[YouTube] yt1s download URL: YES');
             return formatResponse({ ...metadata, ...downloadData }, videoId, url);
         }
-        console.log('[YouTube] Got embed download URL: NO');
+        console.log('[YouTube] yt1s download URL: NO');
     } catch (e) {
-        console.log('[YouTube] Embed extraction error:', e.message);
+        console.log('[YouTube] yt1s API error:', e.message);
+    }
+
+    // Method 4: Try direct API from rapidapi
+    try {
+        downloadData = await getDirectYoutubeDownload(videoId, url);
+        if (downloadData && downloadData.downloadUrl) {
+            console.log('[YouTube] Direct download URL: YES');
+            return formatResponse({ ...metadata, ...downloadData }, videoId, url);
+        }
+        console.log('[YouTube] Direct download URL: NO');
+    } catch (e) {
+        console.log('[YouTube] Direct API error:', e.message);
     }
 
     console.log('[YouTube] No downloadUrl, not caching');
@@ -70,145 +82,212 @@ async function getYoutubeInfo(url) {
 }
 
 /**
- * Get download URL via Cobalt API
- * Official Cobalt API: https://api.cobalt.tools
+ * Get download URL via Y2Mate-style API
  */
-async function getCobaltDownload(url) {
+async function getY2MateDownload(videoId) {
     try {
-        const response = await axios.post('https://api.cobalt.tools/api/json', {
-            url: url,
-            vCodec: 'h264',
-            vQuality: '720',
-            aFormat: 'mp3',
-            filenamePattern: 'basic',
-            isAudioOnly: false
-        }, {
-            timeout: 30000,
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'User-Agent': 'TikDown/1.0'
+        const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
+
+        // Try yt-download.org API
+        const response = await axios.post('https://yt-download.org/api/button/mp4',
+            `url=${encodeURIComponent(youtubeUrl)}`,
+            {
+                timeout: 15000,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Referer': 'https://yt-download.org/',
+                    'Origin': 'https://yt-download.org'
+                }
             }
-        });
+        );
 
-        if (response.data) {
-            const data = response.data;
-            console.log('[YouTube] Cobalt response status:', data.status);
+        // Parse HTML response for download links
+        const html = response.data;
+        const downloadMatch = html.match(/href="(https:\/\/[^"]+)"\s+class="[^"]*download/i);
 
-            if (data.status === 'stream' || data.status === 'redirect') {
-                return {
-                    downloadUrl: data.url,
-                    downloadOptions: [{
-                        quality: '720p',
-                        url: data.url,
-                        type: 'video',
-                        format: 'mp4',
-                        size: 'Unknown'
-                    }],
-                    quality: '720p'
-                };
-            } else if (data.status === 'picker' && data.picker && data.picker.length > 0) {
-                const options = data.picker.map(item => ({
-                    quality: item.type === 'video' ? '720p' : 'Audio',
-                    url: item.url,
-                    type: item.type || 'video',
-                    format: 'mp4',
-                    size: 'Unknown'
-                }));
-
-                return {
-                    downloadUrl: data.picker[0].url,
-                    downloadOptions: options,
-                    quality: '720p'
-                };
-            } else if (data.status === 'error') {
-                console.log('[YouTube] Cobalt error:', data.text);
-            }
-        }
-    } catch (e) {
-        throw new Error(e.response?.data?.text || e.message);
-    }
-
-    return null;
-}
-
-/**
- * Try SaveTube-style API
- */
-async function getSaveTubeDownload(videoId) {
-    try {
-        // Try ssyoutube/savefrom style API
-        const response = await axios.get(`https://www.ssyoutube.com/api/convert?id=${videoId}`, {
-            timeout: 15000,
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'application/json'
-            }
-        });
-
-        if (response.data && response.data.url) {
+        if (downloadMatch && downloadMatch[1]) {
             return {
-                downloadUrl: response.data.url,
+                downloadUrl: downloadMatch[1],
                 downloadOptions: [{
-                    quality: response.data.quality || '720p',
-                    url: response.data.url,
+                    quality: '720p',
+                    url: downloadMatch[1],
                     type: 'video',
                     format: 'mp4',
                     size: 'Unknown'
                 }],
-                quality: response.data.quality || '720p'
+                quality: '720p'
             };
         }
     } catch (e) {
-        // Try alternative endpoint
-        try {
-            const response2 = await axios.post('https://loader.to/ajax/download.php',
-                `format=1080&url=https://www.youtube.com/watch?v=${videoId}`,
-                {
-                    timeout: 15000,
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                    }
-                }
-            );
-
-            if (response2.data && response2.data.download_url) {
-                return {
-                    downloadUrl: response2.data.download_url,
-                    downloadOptions: [{
-                        quality: '1080p',
-                        url: response2.data.download_url,
-                        type: 'video',
-                        format: 'mp4',
-                        size: 'Unknown'
-                    }],
-                    quality: '1080p'
-                };
-            }
-        } catch (e2) {
-            throw new Error(e.message);
-        }
+        throw new Error(e.message);
     }
 
     return null;
 }
 
 /**
- * Try to extract from YouTube embed page
+ * Get download via loader.to
  */
-async function getYouTubeEmbedDownload(videoId) {
+async function getLoaderToDownload(videoId) {
     try {
-        // Try noembed for additional metadata
-        const response = await axios.get(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`, {
-            timeout: 10000
-        });
+        const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
-        // This only gets metadata, not download URL
-        // But we can construct a proxy URL
-        if (response.data && response.data.title) {
-            // Return null as we can't get direct download from noembed
-            return null;
+        // Step 1: Get download ID
+        const initResponse = await axios.get(
+            `https://loader.to/api/button/?url=${encodeURIComponent(youtubeUrl)}&f=mp4`,
+            {
+                timeout: 15000,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+            }
+        );
+
+        // Extract download link from response
+        if (initResponse.data) {
+            const html = initResponse.data;
+            const linkMatch = html.match(/download_url\s*:\s*["']([^"']+)["']/i) ||
+                html.match(/href="(https:\/\/dl\.[^"]+)"/i);
+
+            if (linkMatch && linkMatch[1]) {
+                return {
+                    downloadUrl: linkMatch[1],
+                    downloadOptions: [{
+                        quality: '720p',
+                        url: linkMatch[1],
+                        type: 'video',
+                        format: 'mp4',
+                        size: 'Unknown'
+                    }],
+                    quality: '720p'
+                };
+            }
+        }
+    } catch (e) {
+        throw new Error(e.message);
+    }
+
+    return null;
+}
+
+/**
+ * Get download via yt1s.com style API
+ */
+async function getYt1sDownload(videoId) {
+    try {
+        const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
+
+        // Try ssyoutube which is maintained
+        const response = await axios.get(
+            `https://www.y2mate.com/mates/analyzeV2/ajax`,
+            {
+                params: {
+                    k_query: youtubeUrl,
+                    k_page: 'home',
+                    hl: 'en',
+                    q_auto: 0
+                },
+                timeout: 15000,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                    'Accept': 'application/json'
+                }
+            }
+        );
+
+        if (response.data && response.data.links) {
+            const links = response.data.links;
+            const mp4Links = links.mp4 || {};
+
+            // Get first available quality
+            const qualities = Object.keys(mp4Links);
+            if (qualities.length > 0) {
+                const firstQuality = mp4Links[qualities[0]];
+                if (firstQuality && firstQuality.k) {
+                    // Convert the link
+                    const convertResponse = await axios.post(
+                        'https://www.y2mate.com/mates/convertV2/index',
+                        new URLSearchParams({
+                            vid: videoId,
+                            k: firstQuality.k
+                        }),
+                        {
+                            timeout: 20000,
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                            }
+                        }
+                    );
+
+                    if (convertResponse.data && convertResponse.data.dlink) {
+                        return {
+                            downloadUrl: convertResponse.data.dlink,
+                            downloadOptions: [{
+                                quality: firstQuality.q || '720p',
+                                url: convertResponse.data.dlink,
+                                type: 'video',
+                                format: 'mp4',
+                                size: firstQuality.size || 'Unknown'
+                            }],
+                            quality: firstQuality.q || '720p'
+                        };
+                    }
+                }
+            }
+        }
+    } catch (e) {
+        throw new Error(e.message);
+    }
+
+    return null;
+}
+
+/**
+ * Try direct YouTube download methods
+ */
+async function getDirectYoutubeDownload(videoId, originalUrl) {
+    try {
+        // Try getting info from YouTube's own API
+        const response = await axios.get(
+            `https://www.youtube.com/get_video_info?video_id=${videoId}&el=detailpage`,
+            {
+                timeout: 10000,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
+            }
+        );
+
+        if (response.data) {
+            // Parse the response
+            const params = new URLSearchParams(response.data);
+            const playerResponse = params.get('player_response');
+
+            if (playerResponse) {
+                const data = JSON.parse(playerResponse);
+                const formats = data.streamingData?.formats || [];
+
+                if (formats.length > 0) {
+                    // Get the best quality available
+                    const bestFormat = formats.find(f => f.qualityLabel === '720p') || formats[0];
+
+                    if (bestFormat && bestFormat.url) {
+                        return {
+                            downloadUrl: bestFormat.url,
+                            downloadOptions: formats.slice(0, 5).map(f => ({
+                                quality: f.qualityLabel || 'Unknown',
+                                url: f.url,
+                                type: 'video',
+                                format: f.mimeType?.split(';')[0]?.split('/')[1] || 'mp4',
+                                size: f.contentLength ? `${Math.round(f.contentLength / 1024 / 1024)}MB` : 'Unknown'
+                            })),
+                            quality: bestFormat.qualityLabel || 'HD'
+                        };
+                    }
+                }
+            }
         }
     } catch (e) {
         throw new Error(e.message);
