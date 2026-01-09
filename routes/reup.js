@@ -194,7 +194,7 @@ router.post('/process', processLimiter, async (req, res) => {
 
 /**
  * POST /api/reup/url
- * Process video from URL
+ * Process video from URL (supports TikTok, Facebook, or direct video URLs)
  */
 router.post('/url', processLimiter, async (req, res) => {
     try {
@@ -218,29 +218,112 @@ router.post('/url', processLimiter, async (req, res) => {
             });
         }
 
-        console.log(`📥 Downloading video from URL: ${videoUrl.substring(0, 50)}...`);
+        console.log(`📥 Auto Reup from URL: ${videoUrl.substring(0, 60)}...`);
+
+        let downloadUrl = videoUrl;
+        let isTikTok = false;
+        let isFacebook = false;
+
+        // Check if it's a TikTok URL
+        if (videoUrl.includes('tiktok.com') || videoUrl.includes('vm.tiktok.com')) {
+            isTikTok = true;
+            console.log('🎵 Detected TikTok URL, extracting video...');
+
+            try {
+                // Use existing TikTok download logic
+                const tiktokUtils = require('../utils/tiktok');
+                const videoData = await tiktokUtils.getVideoInfo(videoUrl);
+
+                if (videoData && videoData.videoUrl) {
+                    downloadUrl = videoData.videoUrl;
+                } else if (videoData && videoData.video && videoData.video.noWatermark) {
+                    downloadUrl = videoData.video.noWatermark;
+                } else {
+                    throw new Error('Could not extract TikTok video URL');
+                }
+            } catch (tikErr) {
+                console.error('TikTok extraction error:', tikErr);
+                return res.status(400).json({
+                    success: false,
+                    error: 'Không thể tải video TikTok. Vui lòng thử lại hoặc upload file trực tiếp.'
+                });
+            }
+        }
+
+        // Check if it's a Facebook URL
+        if (videoUrl.includes('facebook.com') || videoUrl.includes('fb.watch')) {
+            isFacebook = true;
+            console.log('📘 Detected Facebook URL, extracting video...');
+
+            try {
+                const facebookUtils = require('../utils/facebook');
+                const fbData = await facebookUtils.getVideoInfo(videoUrl);
+
+                if (fbData && fbData.hdUrl) {
+                    downloadUrl = fbData.hdUrl;
+                } else if (fbData && fbData.sdUrl) {
+                    downloadUrl = fbData.sdUrl;
+                } else {
+                    throw new Error('Could not extract Facebook video URL');
+                }
+            } catch (fbErr) {
+                console.error('Facebook extraction error:', fbErr);
+                return res.status(400).json({
+                    success: false,
+                    error: 'Không thể tải video Facebook. Vui lòng thử lại hoặc upload file trực tiếp.'
+                });
+            }
+        }
 
         // Download video
         const tempPath = path.join(TEMP_DIR, `url-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.mp4`);
 
-        const response = await axios({
-            method: 'GET',
-            url: videoUrl,
-            responseType: 'stream',
-            timeout: 60000,
-            maxContentLength: MAX_FILE_SIZE,
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-            }
-        });
+        try {
+            const response = await axios({
+                method: 'GET',
+                url: downloadUrl,
+                responseType: 'stream',
+                timeout: 120000, // 2 minutes timeout
+                maxContentLength: MAX_FILE_SIZE,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Referer': isTikTok ? 'https://www.tiktok.com/' : (isFacebook ? 'https://www.facebook.com/' : ''),
+                    'Accept': '*/*'
+                }
+            });
 
-        const writer = fs.createWriteStream(tempPath);
-        response.data.pipe(writer);
+            const writer = fs.createWriteStream(tempPath);
+            response.data.pipe(writer);
 
-        await new Promise((resolve, reject) => {
-            writer.on('finish', resolve);
-            writer.on('error', reject);
-        });
+            await new Promise((resolve, reject) => {
+                writer.on('finish', resolve);
+                writer.on('error', reject);
+            });
+        } catch (downloadErr) {
+            console.error('Download error:', downloadErr.message);
+            deleteFile(tempPath);
+            return res.status(400).json({
+                success: false,
+                error: 'Không thể tải video từ URL. Vui lòng kiểm tra link hoặc upload file trực tiếp.'
+            });
+        }
+
+        // Check if file was downloaded
+        if (!fs.existsSync(tempPath)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Video download failed. Please try uploading the file directly.'
+            });
+        }
+
+        const stats = fs.statSync(tempPath);
+        if (stats.size < 10000) { // Less than 10KB - probably an error page
+            deleteFile(tempPath);
+            return res.status(400).json({
+                success: false,
+                error: 'URL không phải video hợp lệ. Vui lòng sử dụng direct video URL hoặc upload file.'
+            });
+        }
 
         // Validate downloaded video
         try {
@@ -249,7 +332,7 @@ router.post('/url', processLimiter, async (req, res) => {
             deleteFile(tempPath);
             return res.status(400).json({
                 success: false,
-                error: validationError.message
+                error: 'Video không hợp lệ: ' + validationError.message
             });
         }
 
@@ -277,7 +360,7 @@ router.post('/url', processLimiter, async (req, res) => {
         console.error('URL processing error:', error);
         res.status(500).json({
             success: false,
-            error: 'Failed to process video from URL: ' + error.message
+            error: 'Lỗi xử lý: ' + error.message
         });
     }
 });
