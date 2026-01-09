@@ -13,6 +13,7 @@ const splitRouter = require('./routes/split');
 const reupRouter = require('./routes/reup');
 const batchRouter = require('./routes/batch');
 const audioModRouter = require('./routes/audioMod');
+const convertRouter = require('./routes/convert');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -73,7 +74,7 @@ app.use('/api/split', splitRouter);
 app.use('/api/reup', reupRouter);
 app.use('/api/batch', batchRouter);
 app.use('/api/audio-mod', audioModRouter);
-
+app.use('/api/convert', convertRouter);
 
 // TikTok to MP3 SEO landing page
 app.get('/convert-tiktok-to-mp3', (req, res) => {
@@ -103,6 +104,11 @@ app.get('/batch-video-cutter', (req, res) => {
 // Safe Audio Modifier landing page
 app.get('/safe-audio-modifier', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'safe-audio-modifier.html'));
+});
+
+// Video Format Converter landing page
+app.get('/video-format-converter', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'video-format-converter.html'));
 });
 
 // Legal Policy Pages

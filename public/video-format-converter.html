@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5993391850162275"
+        crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chuyển Video 16:9 → 9:16 Online | Video Format Converter - TikDown</title>
+    <meta name="description"
+        content="Chuyển đổi video ngang thành dọc cho TikTok, Shorts, Reels. Hỗ trợ blur background, crop center, hoặc thêm viền đen. Miễn phí, nhanh chóng.">
+    <meta name="keywords" content="chuyển đổi video, 16:9 to 9:16, video format converter, tikdown, shorts, reels">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="canonical" href="https://www.tikdown.top/video-format-converter">
+
+    <style>
+        .convert-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--input-border);
+            border-radius: var(--radius-xl);
+            padding: 3rem 2rem;
+            text-align: center;
+            background: var(--card-bg);
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: var(--primary-color);
+            background: rgba(255, 107, 157, 0.05);
+        }
+
+        .upload-area.has-file {
+            border-color: var(--success-color);
+            border-style: solid;
+        }
+
+        .upload-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            color: var(--primary-color);
+        }
+
+        .file-info {
+            display: none;
+            padding: 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: var(--radius-lg);
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        .mode-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .mode-btn {
+            padding: 1.25rem 0.75rem;
+            border: 2px solid var(--input-border);
+            border-radius: var(--radius-lg);
+            background: var(--card-bg);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .mode-btn:hover {
+            border-color: var(--primary-color);
+        }
+
+        .mode-btn.active {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, rgba(255, 107, 157, 0.1), rgba(200, 113, 255, 0.1));
+        }
+
+        .mode-btn .mode-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .mode-btn .mode-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .mode-btn .mode-desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .process-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .process-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .process-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 1.5rem;
+        }
+
+        .progress-container.show {
+            display: block;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--input-border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .error-message,
+        .success-message {
+            display: none;
+            padding: 1rem;
+            border-radius: var(--radius-lg);
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success-color);
+        }
+
+        .error-message.show,
+        .success-message.show {
+            display: block;
+        }
+
+        .preview-section {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .preview-box {
+            text-align: center;
+        }
+
+        .preview-box .ratio-display {
+            border: 2px solid var(--input-border);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--text-secondary);
+        }
+
+        .ratio-16-9 {
+            width: 120px;
+            height: 68px;
+        }
+
+        .ratio-9-16 {
+            width: 68px;
+            height: 120px;
+        }
+
+        .preview-box p {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .arrow-icon {
+            display: flex;
+            align-items: center;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .mode-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-gradient"></div>
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <a href="/" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 0L25 15L40 20L25 25L20 40L15 25L0 20L15 15L20 0Z" fill="url(#logo-gradient)" />
+                        <defs>
+                            <linearGradient id="logo-gradient" x1="0" y1="0" x2="40" y2="40">
+                                <stop offset="0%" stop-color="#FF6B9D" />
+                                <stop offset="100%" stop-color="#C871FF" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <span>TikDown</span>
+                </a>
+            </div>
+            <nav class="nav-links">
+                <button id="darkModeToggle" class="dark-mode-toggle" title="Chế độ tối">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <circle cx="12" cy="12" r="5" />
+                        <path
+                            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                    </svg>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" style="display:none">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
+                </button>
+            </nav>
+        </header>
+
+        <!-- Tools Nav -->
+        <nav class="tools-nav">
+            <div class="tools-nav-inner">
+                <a href="/" class="tool-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7,10 12,15 17,10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    <span>TikTok</span>
+                </a>
+                <a href="/auto-reup-safe-mode" class="tool-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                    <span>Reup</span>
+                </a>
+                <a href="/batch-video-cutter" class="tool-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                    </svg>
+                    <span>Batch</span>
+                </a>
+                <a href="/video-format-converter" class="tool-link active">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="6" width="20" height="12" rx="2" />
+                        <path d="M12 2v4M12 18v4" />
+                    </svg>
+                    <span>9:16</span>
+                </a>
+                <a href="/safe-audio-modifier" class="tool-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18V5l12-2v13" />
+                        <circle cx="6" cy="18" r="3" />
+                    </svg>
+                    <span>Audio</span>
+                </a>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="hero-section">
+                <h1 class="title">
+                    <span>Video Format</span>
+                    <span class="gradient-text">Converter</span>
+                </h1>
+                <p class="subtitle">
+                    Chuyển video ngang (16:9) thành dọc (9:16) cho TikTok, Shorts, Reels
+                </p>
+
+                <!-- Preview -->
+                <div class="preview-section">
+                    <div class="preview-box">
+                        <div class="ratio-display ratio-16-9">16:9</div>
+                        <p>Video gốc</p>
+                    </div>
+                    <div class="arrow-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </div>
+                    <div class="preview-box">
+                        <div class="ratio-display ratio-9-16">9:16</div>
+                        <p>Shorts/Reels</p>
+                    </div>
+                </div>
+
+                <div class="download-card">
+                    <div class="convert-container">
+                        <!-- Upload Area -->
+                        <div class="upload-area" id="uploadArea">
+                            <input type="file" id="videoInput" accept="video/*" hidden>
+                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="17,8 12,3 7,8" />
+                                <line x1="12" y1="3" x2="12" y2="15" />
+                            </svg>
+                            <h3>Kéo thả video vào đây</h3>
+                            <p style="color: var(--text-secondary);">MP4, WebM, MOV - Max 500MB</p>
+                        </div>
+
+                        <div class="file-info" id="fileInfo">
+                            <strong id="fileName"></strong>
+                        </div>
+
+                        <!-- Mode Selector -->
+                        <h4 style="margin-top: 1.5rem; color: var(--text-primary);">Chọn kiểu chuyển đổi:</h4>
+                        <div class="mode-selector">
+                            <button class="mode-btn active" data-mode="blur">
+                                <div class="mode-icon">🌫️</div>
+                                <div class="mode-name">Blur Background</div>
+                                <div class="mode-desc">Nền mờ xung quanh</div>
+                            </button>
+                            <button class="mode-btn" data-mode="crop">
+                                <div class="mode-icon">✂️</div>
+                                <div class="mode-name">Crop Center</div>
+                                <div class="mode-desc">Cắt giữa video</div>
+                            </button>
+                            <button class="mode-btn" data-mode="black">
+                                <div class="mode-icon">⬛</div>
+                                <div class="mode-name">Black Bars</div>
+                                <div class="mode-desc">Viền đen trên dưới</div>
+                            </button>
+                        </div>
+
+                        <!-- Process Button -->
+                        <button class="process-btn" id="processBtn" disabled>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="2" y="6" width="20" height="12" rx="2" />
+                            </svg>
+                            <span>Chuyển Đổi Video</span>
+                        </button>
+
+                        <!-- Progress -->
+                        <div class="progress-container" id="progressContainer">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <p class="progress-text" id="progressText">Đang xử lý...</p>
+                        </div>
+
+                        <!-- Error -->
+                        <div class="error-message" id="errorMessage"></div>
+
+                        <!-- Success -->
+                        <div class="success-message" id="successMessage">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" style="color: var(--success-color); margin-bottom: 1rem;">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                <polyline points="22,4 12,14.01 9,11.01" />
+                            </svg>
+                            <h3 style="color: var(--success-color);">Video đã được chuyển đổi!</h3>
+                            <p style="color: var(--text-secondary);">File đang tải xuống...</p>
+                        </div>
+
+                        <!-- Usage Limit -->
+                        <div
+                            style="text-align: center; padding: 1rem; background: rgba(255, 107, 157, 0.1); border-radius: var(--radius-lg); margin-top: 1.5rem;">
+                            <p style="color: var(--text-secondary);">Còn <strong id="remainingUses"
+                                    style="color: var(--primary-color);">5</strong>/5 lượt miễn phí hôm nay</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 TikDown. Tất cả quyền được bảo lưu.</p>
+            <p class="footer-links">
+                <a href="/">TikTok Downloader</a> |
+                <a href="/auto-reup-safe-mode">Auto Reup</a> |
+                <a href="/batch-video-cutter">Batch Cut</a> |
+                <a href="/video-format-converter">Format 9:16</a> |
+                <a href="/safe-audio-modifier">Audio Safe</a>
+            </p>
+        </footer>
+    </div>
+
+    <script src="translations.js"></script>
+    <script src="converter.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
