@@ -11,6 +11,7 @@ const facebookRouter = require('./routes/facebook');
 const youtubeRouter = require('./routes/youtube');
 const splitRouter = require('./routes/split');
 const reupRouter = require('./routes/reup');
+const batchRouter = require('./routes/batch');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -69,6 +70,7 @@ app.use('/api/facebook', facebookRouter);
 app.use('/api/youtube', youtubeRouter);
 app.use('/api/split', splitRouter);
 app.use('/api/reup', reupRouter);
+app.use('/api/batch', batchRouter);
 
 
 // TikTok to MP3 SEO landing page
@@ -89,6 +91,11 @@ app.get('/tai-video-youtube-shorts-online', (req, res) => {
 // Auto Reup Safe Mode landing page
 app.get('/auto-reup-safe-mode', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'auto-reup-safe-mode.html'));
+});
+
+// Batch Video Cutter landing page
+app.get('/batch-video-cutter', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'batch-video-cutter.html'));
 });
 
 // Legal Policy Pages

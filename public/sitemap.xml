@@ -30,5 +30,11 @@
       <changefreq>weekly</changefreq>
       <priority>0.8</priority>
    </url>
+   <url>
+      <loc>https://www.tikdown.top/batch-video-cutter</loc>
+      <lastmod>2026-01-09</lastmod>
+      <changefreq>weekly</changefreq>
+      <priority>0.8</priority>
+   </url>
 </urlset>
 
