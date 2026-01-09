@@ -33,19 +33,15 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-// Non-www to www redirect - MUST be before all other routes
+// Non-www to www redirect - www.tikdown.top is the canonical domain
+// MUST be before all other routes
 app.use((req, res, next) => {
-  // Get host from multiple possible headers (proxy environments)
-  const host = req.get('host') || req.headers.host || req.headers['x-forwarded-host'] || '';
-  const hostWithoutPort = host.split(':')[0]; // Remove port if present
-
-  console.log(`[REDIRECT CHECK] Host: ${host}, HostWithoutPort: ${hostWithoutPort}, URL: ${req.originalUrl}`);
+  const host = req.get('host') || req.headers.host || '';
+  const hostWithoutPort = host.split(':')[0];
 
   // Redirect non-www to www
   if (hostWithoutPort === 'tikdown.top') {
-    const redirectUrl = `https://www.tikdown.top${req.originalUrl}`;
-    console.log(`[REDIRECT] 301 -> ${redirectUrl}`);
-    return res.redirect(301, redirectUrl);
+    return res.redirect(301, `https://www.tikdown.top${req.originalUrl}`);
   }
   next();
 });
