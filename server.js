@@ -15,6 +15,7 @@ const batchRouter = require('./routes/batch');
 const audioModRouter = require('./routes/audioMod');
 const convertRouter = require('./routes/convert');
 const captionRouter = require('./routes/caption');
+const subtitleRouter = require('./routes/subtitle');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -77,6 +78,7 @@ app.use('/api/batch', batchRouter);
 app.use('/api/audio-mod', audioModRouter);
 app.use('/api/convert', convertRouter);
 app.use('/api/caption', captionRouter);
+app.use('/api/subtitle', subtitleRouter);
 
 // TikTok to MP3 SEO landing page
 app.get('/convert-tiktok-to-mp3', (req, res) => {
@@ -117,6 +119,11 @@ app.get('/video-format-converter', (req, res) => {
 // Caption & Hashtag Generator landing page
 app.get('/caption-hashtag-generator', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'caption-hashtag-generator.html'));
+});
+
+// Auto Subtitle Tool landing page
+app.get('/auto-subtitle-video', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'auto-subtitle-video.html'));
 });
 
 // Legal Policy Pages

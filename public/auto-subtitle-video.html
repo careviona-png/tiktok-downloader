@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5993391850162275"
+        crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo Phụ Đề Tự Động Cho Video | Auto Subtitle Video - TikDown</title>
+    <meta name="description"
+        content="Tự động tạo và chèn phụ đề vào video bằng AI. Hỗ trợ tiếng Việt và tiếng Anh. Nhanh chóng, chính xác, không cần cài đặt phần mềm.">
+    <meta name="keywords" content="tạo phụ đề tự động, auto subtitle video, chèn sub video AI, tikdown subtitle">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="canonical" href="https://www.tikdown.top/auto-subtitle-video">
+
+    <style>
+        .subtitle-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--input-border);
+            border-radius: var(--radius-xl);
+            padding: 3rem 2rem;
+            text-align: center;
+            background: var(--card-bg);
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: var(--primary-color);
+            background: rgba(255, 107, 157, 0.05);
+        }
+
+        .upload-area.has-file {
+            border-color: var(--success-color);
+            border-style: solid;
+        }
+
+        .upload-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            color: var(--primary-color);
+        }
+
+        .config-group {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--input-border);
+            margin-bottom: 1.5rem;
+        }
+
+        .label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--input-border);
+            border-radius: var(--radius-md);
+            background: var(--input-bg);
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .api-info {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: -0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .api-info a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .process-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .process-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .process-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status-container {
+            display: none;
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: rgba(255, 107, 157, 0.1);
+            border-radius: var(--radius-lg);
+        }
+
+        .status-container.show {
+            display: block;
+        }
+
+        .status-step {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .status-step.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .status-step.done {
+            color: var(--success-color);
+        }
+
+        .status-step .icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--input-border);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            width: 0%;
+            transition: width 0.5s;
+        }
+
+        .error-message,
+        .success-message {
+            display: none;
+            padding: 1rem;
+            border-radius: var(--radius-lg);
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success-color);
+        }
+
+        .error-message.show,
+        .success-message.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-gradient"></div>
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <a href="/" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 0L25 15L40 20L25 25L20 40L15 25L0 20L15 15L20 0Z" fill="url(#logo-gradient)" />
+                    </svg>
+                    <span>TikDown</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- Tools Nav -->
+        <nav class="tools-nav">
+            <div class="tools-nav-inner">
+                <a href="/" class="tool-link"><span>TikTok</span></a>
+                <a href="/caption-hashtag-generator" class="tool-link"><span>Caption</span></a>
+                <a href="/auto-subtitle-video" class="tool-link active"><span>Subtitle</span></a>
+                <a href="/auto-reup-safe-mode" class="tool-link"><span>Reup</span></a>
+                <a href="/batch-video-cutter" class="tool-link"><span>Batch</span></a>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="hero-section">
+                <h1 class="title">
+                    <span>Auto Subtitle</span>
+                    <span class="gradient-text">Video</span>
+                </h1>
+                <p class="subtitle">
+                    Tự động tạo và chèn phụ đề vào video bằng AI cực nhanh
+                </p>
+
+                <div class="subtitle-container">
+                    <div class="download-card">
+                        <!-- Upload Area -->
+                        <div class="upload-area" id="uploadArea">
+                            <input type="file" id="videoInput" accept="video/*" hidden>
+                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="2" y="4" width="20" height="16" rx="2" ry="2" />
+                                <path d="M10 10l4 4-4 4" />
+                            </svg>
+                            <h3>Kéo thả video vào đây</h3>
+                            <p style="color: var(--text-secondary);">MP4, WebM - Max 100MB</p>
+                        </div>
+
+                        <div class="file-info" id="fileInfo"
+                            style="display:none; text-align:center; margin-bottom:1rem;">
+                            <strong id="fileName" style="color: var(--success-color);"></strong>
+                        </div>
+
+                        <!-- Config -->
+                        <div class="config-group">
+                            <label class="label">Ngôn ngữ trong video:</label>
+                            <select id="languageSelect" class="input-field">
+                                <option value="vi">Tiếng Việt</option>
+                                <option value="en">Tiếng Anh</option>
+                            </select>
+
+                            <label class="label">API Key (Tùy chọn):</label>
+                            <input type="password" id="apiKeyInput" class="input-field"
+                                placeholder="Dán Groq API Key của bạn để sử dụng">
+                            <p class="api-info">
+                                Lấy key miễn phí tại: <a href="https://console.groq.com/keys" target="_blank">Groq
+                                    Console</a> (Whisper V3 cực nhanh)
+                            </p>
+                        </div>
+
+                        <!-- Process Button -->
+                        <button class="process-btn" id="processBtn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                            </svg>
+                            <span>Bắt Đầu Tạo Phụ Đề</span>
+                        </button>
+
+                        <!-- Status -->
+                        <div class="status-container" id="statusContainer">
+                            <div class="status-step" id="step1">
+                                <div class="icon">⏳</div>
+                                <span>Đang trích xuất âm thanh...</span>
+                            </div>
+                            <div class="status-step" id="step2">
+                                <div class="icon">🤖</div>
+                                <span>Đang nhận diện lời nói AI...</span>
+                            </div>
+                            <div class="status-step" id="step3">
+                                <div class="icon">🎬</div>
+                                <span>Đang chèn phụ đề vào video...</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                        </div>
+
+                        <!-- Messages -->
+                        <div class="error-message" id="errorMessage"></div>
+                        <div class="success-message" id="successMessage">
+                            <h3 style="color: var(--success-color);">Hoàn thành!</h3>
+                            <p>Video đã được chèn phụ đề và đang tải xuống.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 TikDown. Tất cả quyền được bảo lưu.</p>
+        </footer>
+    </div>
+
+    <script src="translations.js"></script>
+    <script src="subtitle.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
