@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5993391850162275"
+        crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Reup Safe Mode – Giảm Trùng Lặp Video Online | TikDown</title>
+    <meta name="description"
+        content="Auto Reup Safe Mode - Công cụ hỗ trợ reup video an toàn, giảm phát hiện trùng lặp. Áp dụng thay đổi ngẫu nhiên nhẹ để video độc đáo hơn. Miễn phí, nhanh chóng, bảo mật.">
+    <meta name="keywords"
+        content="auto reup, reup video, giảm trùng lặp video, MMO tool, tikdown reup, safe mode video">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="affiliate-styles.css">
+
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.tikdown.top/auto-reup-safe-mode">
+    <meta property="og:title" content="Auto Reup Safe Mode – Giảm Trùng Lặp Video | TikDown">
+    <meta property="og:description" content="Công cụ hỗ trợ reup video an toàn, giảm phát hiện trùng lặp cho MMO.">
+    <meta property="og:image" content="https://www.tikdown.top/og-image.png">
+
+    <link rel="canonical" href="https://www.tikdown.top/auto-reup-safe-mode">
+
+    <style>
+        .reup-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--input-border);
+            border-radius: var(--radius-xl);
+            padding: 3rem 2rem;
+            text-align: center;
+            background: var(--card-bg);
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: var(--primary-color);
+            background: rgba(255, 107, 157, 0.05);
+        }
+
+        .upload-area.has-file {
+            border-color: var(--success-color);
+            border-style: solid;
+        }
+
+        .upload-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            color: var(--primary-color);
+        }
+
+        .upload-text h3 {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-text p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .file-info {
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: var(--radius-lg);
+            margin-top: 1rem;
+        }
+
+        .file-info.show {
+            display: flex;
+        }
+
+        .file-info svg {
+            color: var(--success-color);
+            flex-shrink: 0;
+        }
+
+        .file-details {
+            flex: 1;
+            text-align: left;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            word-break: break-all;
+        }
+
+        .file-size {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .remove-file {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .or-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .or-divider::before,
+        .or-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--input-border);
+        }
+
+        .or-divider span {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .url-input-wrapper {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .url-input-wrapper input {
+            flex: 1;
+            padding: 0.9rem 1rem;
+            border: 1px solid var(--input-border);
+            border-radius: var(--radius-lg);
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .process-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .process-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .process-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 1.5rem;
+        }
+
+        .progress-container.show {
+            display: block;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--input-border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border: 1px solid var(--input-border);
+        }
+
+        .info-card h4 {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-card li {
+            color: var(--text-secondary);
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .info-card li svg {
+            color: var(--success-color);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .usage-limit {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 107, 157, 0.1);
+            border-radius: var(--radius-lg);
+            margin-top: 1.5rem;
+        }
+
+        .usage-limit p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .usage-limit strong {
+            color: var(--primary-color);
+        }
+
+        .error-message {
+            display: none;
+            padding: 1rem;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: var(--radius-lg);
+            color: #ef4444;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            display: none;
+            padding: 1.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: var(--radius-lg);
+            color: var(--success-color);
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+    </style>
+
+    <!-- FAQ Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [{
+            "@type": "Question",
+            "name": "Auto Reup Safe Mode là gì?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Auto Reup Safe Mode là công cụ giúp áp dụng các thay đổi ngẫu nhiên nhẹ lên video để giảm khả năng bị phát hiện trùng lặp khi reup lên các nền tảng."
+            }
+        }, {
+            "@type": "Question",
+            "name": "Công cụ có làm giảm chất lượng video không?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Không. Các thay đổi được áp dụng rất nhẹ, không ảnh hưởng đến chất lượng hình ảnh và âm thanh của video."
+            }
+        }, {
+            "@type": "Question",
+            "name": "Có mất phí sử dụng không?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Miễn phí 3 lần sử dụng mỗi ngày. Sau đó có thể xem quảng cáo để mở khóa thêm lượt hoặc chờ reset vào ngày hôm sau."
+            }
+        }]
+    }
+    </script>
+</head>
+
+<body>
+    <div class="background-gradient"></div>
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <a href="/" style="display: flex; align-items: center; text-decoration: none; color: inherit;">
+                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        role="img">
+                        <title>TikDown Logo</title>
+                        <path d="M20 0L25 15L40 20L25 25L20 40L15 25L0 20L15 15L20 0Z" fill="url(#logo-gradient)" />
+                        <defs>
+                            <linearGradient id="logo-gradient" x1="0" y1="0" x2="40" y2="40">
+                                <stop offset="0%" stop-color="#FF6B9D" />
+                                <stop offset="100%" stop-color="#C871FF" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <span>TikDown</span>
+                </a>
+            </div>
+            <nav class="nav-links">
+                <button id="darkModeToggle" class="dark-mode-toggle" title="Chế độ tối">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <circle cx="12" cy="12" r="5" />
+                        <path
+                            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                    </svg>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" style="display:none">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
+                </button>
+            </nav>
+        </header>
+
+        <!-- Tools Navigation Menu -->
+        <nav class="tools-nav">
+            <div class="tools-nav-inner">
+                <a href="/" class="tool-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7,10 12,15 17,10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    <span>TikTok</span>
+                </a>
+                <a href="/cat-video-online" class="tool-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="6" cy="6" r="3" />
+                        <circle cx="6" cy="18" r="3" />
+                        <line x1="20" y1="4" x2="8.12" y2="15.88" />
+                        <line x1="14.47" y1="14.48" x2="20" y2="20" />
+                    </svg>
+                    <span>Cắt Video</span>
+                </a>
+                <a href="/auto-reup-safe-mode" class="tool-link active">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                    <span>Auto Reup</span>
+                </a>
+                <a href="/dao-nguoc-video-online" class="tool-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 1l4 4-4 4" />
+                        <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                    </svg>
+                    <span>Đảo Ngược</span>
+                </a>
+                <a href="/convert-tiktok-to-mp3" class="tool-link">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18V5l12-2v13" />
+                        <circle cx="6" cy="18" r="3" />
+                        <circle cx="18" cy="16" r="3" />
+                    </svg>
+                    <span>MP3</span>
+                </a>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="hero-section">
+                <h1 class="title">
+                    <span>Auto Reup</span>
+                    <span class="gradient-text">Safe Mode</span>
+                </h1>
+                <p class="subtitle">
+                    Giảm phát hiện trùng lặp video khi reup - Áp dụng thay đổi ngẫu nhiên nhẹ, không giảm chất lượng
+                </p>
+
+                <div class="download-card">
+                    <div class="reup-container">
+                        <!-- Upload Area -->
+                        <div class="upload-area" id="uploadArea">
+                            <input type="file" id="videoInput" accept="video/*" hidden>
+                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="17,8 12,3 7,8" />
+                                <line x1="12" y1="3" x2="12" y2="15" />
+                            </svg>
+                            <div class="upload-text">
+                                <h3>Kéo thả video vào đây</h3>
+                                <p>hoặc nhấp để chọn file (MP4, WebM, MOV - Max 500MB)</p>
+                            </div>
+                            <div class="file-info" id="fileInfo">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                    <polyline points="14,2 14,8 20,8" />
+                                </svg>
+                                <div class="file-details">
+                                    <div class="file-name" id="fileName"></div>
+                                    <div class="file-size" id="fileSize"></div>
+                                </div>
+                                <button class="remove-file" id="removeFile" title="Xóa file">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <line x1="18" y1="6" x2="6" y2="18" />
+                                        <line x1="6" y1="6" x2="18" y2="18" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="or-divider">
+                            <span>hoặc paste URL video</span>
+                        </div>
+
+                        <!-- URL Input -->
+                        <div class="url-input-wrapper">
+                            <input type="text" id="videoUrl" placeholder="Dán link video trực tiếp (MP4, WebM...)">
+                        </div>
+
+                        <!-- Process Button -->
+                        <button class="process-btn" id="processBtn" disabled>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            </svg>
+                            <span>Xử Lý Auto Reup</span>
+                        </button>
+
+                        <!-- Progress -->
+                        <div class="progress-container" id="progressContainer">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <div class="progress-text" id="progressText">Đang xử lý...</div>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div class="error-message" id="errorMessage"></div>
+
+                        <!-- Success Message -->
+                        <div class="success-message" id="successMessage">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" style="margin-bottom: 1rem;">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                <polyline points="22,4 12,14.01 9,11.01" />
+                            </svg>
+                            <h3>Video đã được xử lý thành công!</h3>
+                            <p>File đang tải xuống...</p>
+                        </div>
+
+                        <!-- Usage Limit -->
+                        <div class="usage-limit" id="usageLimit">
+                            <p>Còn <strong id="remainingUses">3</strong>/3 lượt miễn phí hôm nay</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Card -->
+                <div class="info-card">
+                    <h4>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="16" x2="12" y2="12" />
+                            <line x1="12" y1="8" x2="12.01" y2="8" />
+                        </svg>
+                        Auto Reup Safe Mode hoạt động như thế nào?
+                    </h4>
+                    <ul>
+                        <li>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="20,6 9,17 4,12" />
+                            </svg>
+                            <span><strong>Tốc độ phát:</strong> Điều chỉnh ±3-5% (không nhận thấy được)</span>
+                        </li>
+                        <li>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="20,6 9,17 4,12" />
+                            </svg>
+                            <span><strong>Màu sắc:</strong> Thay đổi độ sáng/tương phản rất nhẹ</span>
+                        </li>
+                        <li>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="20,6 9,17 4,12" />
+                            </svg>
+                            <span><strong>Lật ngang:</strong> Ngẫu nhiên có hoặc không</span>
+                        </li>
+                        <li>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="20,6 9,17 4,12" />
+                            </svg>
+                            <span><strong>Cắt viền:</strong> 1-2% mép video</span>
+                        </li>
+                        <li>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="20,6 9,17 4,12" />
+                            </svg>
+                            <span><strong>Metadata:</strong> Làm mới thông tin file hoàn toàn</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- SEO Content -->
+                <section class="seo-about" style="margin-top: 2rem;">
+                    <h2 class="section-title">Công cụ hỗ trợ Reup Video an toàn</h2>
+                    <div class="about-content">
+                        <p>
+                            <strong>Auto Reup Safe Mode</strong> là công cụ được thiết kế dành cho những người làm MMO,
+                            giúp áp dụng các thay đổi ngẫu nhiên nhẹ lên video để <strong>giảm khả năng bị phát hiện
+                                trùng lặp</strong>
+                            khi upload lên các nền tảng như YouTube, TikTok, Facebook.
+                        </p>
+                        <p>
+                            Các thay đổi được áp dụng hoàn toàn tự động và ngẫu nhiên, đảm bảo mỗi lần xử lý tạo ra một
+                            video khác biệt mà <strong>không làm giảm chất lượng</strong> hình ảnh hay âm thanh.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- FAQ Section -->
+                <section class="seo-faq">
+                    <center>
+                        <h2 class="section-title">Câu hỏi thường gặp (FAQ)</h2>
+                    </center>
+                    <div class="faq-grid">
+                        <div class="faq-item">
+                            <h4>Auto Reup có an toàn không?</h4>
+                            <p>Hoàn toàn an toàn. Công cụ chỉ áp dụng các thay đổi nhẹ về kỹ thuật, không thêm watermark
+                                hay nội dung lạ.</p>
+                        </div>
+                        <div class="faq-item">
+                            <h4>Video có bị giảm chất lượng không?</h4>
+                            <p>Không. Chúng tôi sử dụng cài đặt encoding chất lượng cao, đảm bảo đầu ra gần như giống
+                                hệt đầu vào.</p>
+                        </div>
+                        <div class="faq-item">
+                            <h4>Có thể xử lý video dài không?</h4>
+                            <p>Hỗ trợ video tối đa 30 phút và 500MB. Với video dài hơn, khuyến nghị cắt nhỏ trước bằng
+                                công cụ Cắt Video.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Related Tools -->
+                <section class="seo-features" style="margin-top: 2rem;">
+                    <h2 class="section-title">Công cụ khác bạn có thể cần</h2>
+                    <div class="features-grid">
+                        <a href="/cat-video-online" class="feature-card" style="text-decoration: none; color: inherit;">
+                            <div class="feature-icon feature-icon-1">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <circle cx="6" cy="6" r="3" />
+                                    <line x1="20" y1="4" x2="8.12" y2="15.88" />
+                                </svg>
+                            </div>
+                            <h3>Cắt Video Online</h3>
+                            <p>Chia nhỏ video dài thành nhiều clip ngắn.</p>
+                        </a>
+                        <a href="/dao-nguoc-video-online" class="feature-card"
+                            style="text-decoration: none; color: inherit;">
+                            <div class="feature-icon feature-icon-2">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M17 1l4 4-4 4" />
+                                    <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                                </svg>
+                            </div>
+                            <h3>Đảo Ngược Video</h3>
+                            <p>Lật ngang video để tránh bản quyền.</p>
+                        </a>
+                        <a href="/" class="feature-card" style="text-decoration: none; color: inherit;">
+                            <div class="feature-icon feature-icon-3">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                    <polyline points="7,10 12,15 17,10" />
+                                </svg>
+                            </div>
+                            <h3>Tải Video TikTok</h3>
+                            <p>Tải video không logo, chất lượng HD.</p>
+                        </a>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 TikDown. Tất cả quyền được bảo lưu.</p>
+            <p class="footer-links">
+                <a href="/privacy-policy.html">Privacy Policy</a> |
+                <a href="/terms-of-service.html">Terms of Service</a> |
+                <a href="/convert-tiktok-to-mp3" title="Chuyển TikTok sang MP3">TikTok MP3</a> |
+                <a href="/dao-nguoc-video-online" title="Đảo ngược video">Reverse Video</a> |
+                <a href="/cat-video-online" title="Cắt video online">Cắt Video</a> |
+                <a href="/auto-reup-safe-mode" title="Auto Reup Safe Mode">Auto Reup</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="translations.js"></script>
+    <script src="reup.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
