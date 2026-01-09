@@ -9,6 +9,7 @@ const flipRouter = require('./routes/flip');
 const audioRouter = require('./routes/audio');
 const facebookRouter = require('./routes/facebook');
 const youtubeRouter = require('./routes/youtube');
+const splitRouter = require('./routes/split');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -60,6 +61,7 @@ app.use('/api/flip', flipRouter);
 app.use('/api/audio', audioRouter);
 app.use('/api/facebook', facebookRouter);
 app.use('/api/youtube', youtubeRouter);
+app.use('/api/split', splitRouter);
 
 
 // TikTok to MP3 SEO landing page
@@ -84,6 +86,11 @@ app.get('/disclaimer-policy', (req, res) => {
 
 app.get('/dmca-policy', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dmca-policy.html'));
+});
+
+// Video Splitter SEO landing page
+app.get('/cat-video-online', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'cat-video-online.html'));
 });
 
 // Serve static frontend files AFTER specific routes
