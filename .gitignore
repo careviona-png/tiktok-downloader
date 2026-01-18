@@ -1,3 +1,6 @@
 node_modules
 .env
 temp
+dist
+public/downloads/*.exe
+public/downloads/*.dmg

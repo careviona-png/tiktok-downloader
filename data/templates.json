@@ -1,0 +1,203 @@
+{
+    "beauty": {
+        "keywords": [
+            "son",
+            "môi",
+            "da",
+            "mặt",
+            "trang điểm",
+            "kem",
+            "phấn",
+            "mỹ phẩm",
+            "lipstick",
+            "skin",
+            "makeup",
+            "lotion",
+            "serum",
+            "dưỡng"
+        ],
+        "hooks": [
+            "Bí quyết da đẹp chuẩn Hàn chỉ với 2 bước cực đơn giản!",
+            "Đừng bỏ qua món bảo bối này nếu bạn muốn xinh hơn mỗi ngày.",
+            "Top 1 sản phẩm đang làm mưa làm gió trên TikTok đây rồi!"
+        ],
+        "benefits": [
+            "Giúp da căng bóng, mịn màng ngay lần đầu sử dụng.",
+            "Tone màu cực tây, phù hợp mọi loại da.",
+            "Thiết kế sang chảnh, nhỏ gọn mang đi đâu cũng tiện."
+        ],
+        "proofs": [
+            "Hàng nghìn đánh giá 5 sao trên Shopee.",
+            "Hot tiktoker nào cũng đang dùng em này.",
+            "Đảm bảo chính hãng, check code thoải mái."
+        ],
+        "ctas": {
+            "soft": "Link mình để ở bio nha cả nhà.",
+            "medium": "Săn ngay kẻo hết deal hời ở link bên dưới nhé!",
+            "hard": "Mua ngay tại đây để nhận ưu đãi!"
+        },
+        "hashtags": [
+            "#beauty",
+            "#reviewlamdep",
+            "#shopeereview",
+            "#skincare",
+            "#makeup"
+        ]
+    },
+    "fashion": {
+        "keywords": [
+            "áo",
+            "quần",
+            "váy",
+            "đầm",
+            "túi",
+            "giày",
+            "dép",
+            "fashion",
+            "thời trang",
+            "outfit",
+            "mix",
+            "đồ"
+        ],
+        "hooks": [
+            "Lên đồ cực cháy với outfit chưa đến 200 cành!",
+            "Mặc gì đi chơi? Gợi ý set đồ siêu xinh cho nàng.",
+            "Unbox chiếc túi hot trend giá hạt dẻ."
+        ],
+        "benefits": [
+            "Chất vải dày dặn, không nhăn, form chuẩn.",
+            "Dễ phối đồ, mặc đi học hay đi làm đều ok.",
+            "Màu sắc trendy, tôn dáng cực kỳ."
+        ],
+        "proofs": [
+            "Feedback hình thật 100% từ khách mua.",
+            "Lượt mua khủng, shop uy tín.",
+            "Được kiểm tra hàng trước khi nhận."
+        ],
+        "ctas": {
+            "soft": "Tham khảo link ở góc màn hình nhé.",
+            "medium": "Bấm vào giỏ hàng để xem thêm màu nha.",
+            "hard": "Chốt đơn ngay tại link này kẻo lỡ!"
+        },
+        "hashtags": [
+            "#thoitrang",
+            "#outfit",
+            "#shopeehaul",
+            "#phoido",
+            "#ootd"
+        ]
+    },
+    "home_kitchen": {
+        "keywords": [
+            "bếp",
+            "nồi",
+            "chảo",
+            "nhà cửa",
+            "decor",
+            "đèn",
+            "kệ",
+            "tủ",
+            "gối",
+            "chăn",
+            "home",
+            "kitchen"
+        ],
+        "hooks": [
+            "F5 lại căn phòng với món đồ decor siêu rẻ.",
+            "Vào bếp nhàn tênh nhờ trợ thủ đắc lực này.",
+            "Phát hiện món đồ gia dụng thông minh ai cũng cần."
+        ],
+        "benefits": [
+            "Tiết kiệm không gian, lắp đặt dễ dàng.",
+            "Đa năng, tiện lợi, giúp việc nhà đơn giản hơn.",
+            "Chất liệu bền bỉ, dùng cả năm chưa hỏng."
+        ],
+        "proofs": [
+            "Top sản phẩm bán chạy nhất tháng vừa rồi.",
+            "Review cực tốt từ hội yêu bếp.",
+            "Bảo hành 1 đổi 1 nếu lỗi."
+        ],
+        "ctas": {
+            "soft": "Ghé link mình ghim để xem chi tiết nhé.",
+            "medium": "Sắm ngay để việc nhà nhẹ nhàng hơn.",
+            "hard": "Bấm mua ngay để nhận giá ưu đãi!"
+        },
+        "hashtags": [
+            "#nghiennha",
+            "#yeubep",
+            "#decor",
+            "#giadungthongminh"
+        ]
+    },
+    "tech": {
+        "keywords": [
+            "điện thoại",
+            "tai nghe",
+            "loa",
+            "sạc",
+            "cáp",
+            "phím",
+            "chuột",
+            "tech",
+            "ốp",
+            "case",
+            "iphone",
+            "android"
+        ],
+        "hooks": [
+            "Món phụ kiện công nghệ không thể thiếu cho dân chơi hệ tech.",
+            "Tai nghe giá rẻ mà bass đập cực căng?",
+            "Unbox món đồ chơi công nghệ siêu độc lạ."
+        ],
+        "benefits": [
+            "Kết nối siêu nhanh, pin trâu dùng cả ngày.",
+            "Thiết kế gaming cực ngầu, led RGB xịn xò.",
+            "Tương thích mọi thiết bị, cắm là chạy."
+        ],
+        "proofs": [
+            "Công nghệ mới nhất 2024.",
+            "Reviewer công nghệ đánh giá rất cao.",
+            "Bảo hành chính hãng 12 tháng."
+        ],
+        "ctas": {
+            "soft": "Link sản phẩm mình để ở đây nha.",
+            "medium": "Check ngay link bên dưới để xem giá.",
+            "hard": "Múc ngay em nó tại link này!"
+        },
+        "hashtags": [
+            "#congnghe",
+            "#reviewcongnghe",
+            "#tainghe",
+            "#phukien"
+        ]
+    },
+    "general": {
+        "keywords": [],
+        "hooks": [
+            "Hôm nay mình sẽ review một món đồ cực hay ho.",
+            "Đừng lướt qua nếu bạn đang tìm kiếm thứ này.",
+            "Unbox cùng mình món hàng hot hit này nha."
+        ],
+        "benefits": [
+            "Giá thành hợp lý so với chất lượng.",
+            "Sử dụng đơn giản, hiệu quả tức thì.",
+            "Giúp cuộc sống của bạn tiện lợi hơn."
+        ],
+        "proofs": [
+            "Hàng ngàn lượt bán trên các sàn.",
+            "Được nhiều người tin dùng.",
+            "Cam kết chất lượng từ shop."
+        ],
+        "ctas": {
+            "soft": "Link mình để trong bio nhé.",
+            "medium": "Xem thêm thông tin ở link bên dưới.",
+            "hard": "Mua ngay nào mọi người ơi!"
+        },
+        "hashtags": [
+            "#review",
+            "#unboxing",
+            "#learnontiktok",
+            "#shopee"
+        ]
+    }
+}

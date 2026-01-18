@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikDown Automation Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --sidebar-width: 260px;
+            --bg-dark: #111;
+            --bg-card: #1e1e1e;
+            --accent: #FE2C55;
+            --accent-hover: #E02045;
+            --text-main: #fff;
+            --text-sec: #888;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--bg-card);
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            border-right: 1px solid #333;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-sec);
+            margin-bottom: 5px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(254, 44, 85, 0.1);
+            color: var(--accent);
+        }
+
+        /* Main Content */
+        .main {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-val {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: var(--text-sec);
+            font-size: 14px;
+        }
+
+        .green {
+            color: #00E676;
+        }
+
+        /* Tabs */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px;
+            color: var(--text-sec);
+            border-bottom: 1px solid #333;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        .tag {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .tag-safe {
+            background: rgba(0, 230, 118, 0.1);
+            color: #00E676;
+        }
+
+        .tag-warn {
+            background: rgba(255, 179, 0, 0.1);
+            color: #FFB300;
+        }
+
+        .tag-block {
+            background: rgba(255, 23, 68, 0.1);
+            color: #FF1744;
+        }
+
+        /* Tools inputs */
+        input,
+        textarea {
+            width: 100%;
+            background: #111;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        button.primary {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Ad Placeholder */
+        .ad-space {
+            height: 100px;
+            background: #252525;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            margin: 20px 0;
+            border: 1px dashed #444;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <div class="logo">⚡ TikDown Pro</div>
+        <div class="nav-item active" onclick="switchTab('dashboard')">📊 Dashboard</div>
+        <div class="nav-item" onclick="switchTab('campaigns')">🚀 Campaigns (MMO)</div>
+        <div class="nav-item" onclick="switchTab('compliance')">🛡️ Compliance Check</div>
+        <div class="nav-item" onclick="switchTab('tracking')">🔗 Redirect Logs</div>
+        <div class="nav-item" onclick="switchTab('settings')">⚙️ Settings</div>
+    </div>
+
+    <div class="main">
+        <div class="header">
+            <h1>Dashboard</h1>
+            <button class="primary" onclick="window.location.href='/tool'">+ New Upload Pack</button>
+        </div>
+
+        <!-- DASHBOARD TAB -->
+        <div id="dashboard" class="tab-content active">
+            <div class="ad-space">Lazy Load Ad Space (Monetization Mod 9)</div>
+
+            <div class="stats-grid">
+                <div class="card">
+                    <div class="stat-label">Total Clicks (Valid)</div>
+                    <div class="stat-val">0</div>
+                    <div class="green">↑ 0%</div>
+                </div>
+                <div class="card">
+                    <div class="stat-label">Suspicious / Bot</div>
+                    <div class="stat-val zero">0</div>
+                    <div class="stat-label">Filtered safely</div>
+                </div>
+                <div class="card">
+                    <div class="stat-label">Conversion Rate</div>
+                    <div class="stat-val">0.0%</div>
+                    <div class="green">Based on valid traffic</div>
+                </div>
+                <div class="card">
+                    <div class="stat-label">Active Campaigns</div>
+                    <div class="stat-val">0</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📈 Traffic Performance (Simulated)</h3>
+                <canvas id="trafficChart" height="80"></canvas>
+            </div>
+        </div>
+
+        <!-- CAMPAIGNS TAB -->
+        <div id="campaigns" class="tab-content">
+            <div class="card">
+                <h3>A/B Testing Results</h3>
+                <p style="color: #888; margin-bottom: 20px;">Compare video variants to see which drives more clicks.</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Video Name</th>
+                            <th>Variant A (Clicks)</th>
+                            <th>Variant B (Clicks)</th>
+                            <th>Winner</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ab-table">
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: #555;">No data yet. Need more traffic.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- COMPLIANCE TAB (Mod 5) -->
+        <div id="compliance" class="tab-content">
+            <div class="card">
+                <h3>🛡️ Nội dung an toàn (Compliance Filter)</h3>
+                <p>Kiểm tra văn bản trước khi đăng để tránh vi phạm chính sách (Y tế, Cam kết, v.v.)</p>
+
+                <textarea id="checkText" rows="5" placeholder="Nhập caption hoặc script vào đây..."></textarea>
+                <button class="primary" onclick="checkCompliance()">Kiểm tra ngay</button>
+
+                <div id="checkResult" style="margin-top: 20px; display: none;">
+                    <h4>Kết quả:</h4>
+                    <div class="result-box" style="padding: 15px; border-radius: 8px; background: #222;">
+                        <span id="statusBadge" class="tag">PASS</span>
+                        <ul id="issueList" style="margin-top: 10px; color: #ff5555;"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TRACKING TAB (Mod 4) -->
+        <div id="tracking" class="tab-content">
+            <div class="card">
+                <h3>🔗 Redirect Logs (Live)</h3>
+                <br>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Video ID</th>
+                            <th>Variant</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logs-table">
+                        <!-- Logs populated via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Tab Switching
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            // Update header
+            document.querySelector('.header h1').innerText = tabId.charAt(0).toUpperCase() + tabId.slice(1);
+        }
+
+        // Chart.js Mock
+        const ctx = document.getElementById('trafficChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Valid Clicks',
+                    data: [0, 0, 0, 0, 0, 0, 0],
+                    borderColor: '#FE2C55',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, grid: { color: '#333' } }, x: { grid: { display: false } } }
+            }
+        });
+
+        // Compliance Check Function
+        async function checkCompliance() {
+            const text = document.getElementById('checkText').value;
+            // In real app, call API. Simulating logic here for UI demo.
+            // We can actually call the backend if we expose an endpoint, but for now client-side logic mimicking server
+
+            const banned = ['cam kết', 'chữa khỏi', '100%'];
+            let issues = [];
+            let status = 'PASS';
+
+            banned.forEach(word => {
+                if (text.toLowerCase().includes(word)) {
+                    issues.push(word);
+                    status = 'BLOCK';
+                    if (word === '100%') status = 'WARNING';
+                }
+            });
+
+            const resDiv = document.getElementById('checkResult');
+            const badge = document.getElementById('statusBadge');
+            const list = document.getElementById('issueList');
+
+            resDiv.style.display = 'block';
+            list.innerHTML = '';
+
+            if (status === 'PASS') {
+                badge.className = 'tag tag-safe';
+                badge.innerText = '✅ Hợp lệ (Safe)';
+                list.innerHTML = '<li>Không tìm thấy từ khóa vi phạm.</li>';
+            } else if (status === 'WARNING') {
+                badge.className = 'tag tag-warn';
+                badge.innerText = '⚠️ Cảnh báo (Soft Warning)';
+            } else {
+                badge.className = 'tag tag-block';
+                badge.innerText = '⛔ Đã chặn (Hard Block)';
+            }
+
+            issues.forEach(i => {
+                list.innerHTML += `<li>Phát hiện từ khóa: <strong>${i}</strong></li>`;
+            });
+        }
+
+        // Load Logs (Real)
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/dashboard/stats');
+                const data = await res.json();
+
+                // Update Cards
+                const vals = document.querySelectorAll('.stat-val');
+                if (vals.length > 1) {
+                    vals[0].innerText = data.valid || 0;
+                    vals[1].innerText = data.suspicious || 0;
+                }
+
+                // Update Logs Table
+                const tbody = document.getElementById('logs-table');
+                if (tbody) {
+                    tbody.innerHTML = '';
+
+                    if (!data.logs || data.logs.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#555">Chưa có dữ liệu tracking</td></tr>';
+                    } else {
+                        data.logs.forEach(log => {
+                            const row = `<tr>
+                                <td>${new Date(log.timestamp).toLocaleTimeString()}</td>
+                                <td>${log.vid}</td>
+                                <td>${log.variant}</td>
+                                <td>${log.is_valid ? '<span class="tag tag-safe">Valid</span>' : '<span class="tag tag-warn">Suspicious</span>'}</td>
+                            </tr>`;
+                            tbody.innerHTML += row;
+                        });
+                    }
+                }
+
+            } catch (e) {
+                console.error('Failed to load stats', e);
+            }
+        }
+
+        // Init
+        loadStats();
+        setInterval(loadStats, 5000);
+
+    </script>
+</body>
+
+</html>

@@ -2,7 +2,10 @@
 # This file configures the build environment for Railway
 
 [phases.setup]
-nixPkgs = ["nodejs_20", "ffmpeg-full", "yt-dlp"]
+nixPkgs = ["nodejs_20", "ffmpeg-full", "yt-dlp", "chromium"]
+
+[variables]
+PUPPETEER_EXECUTABLE_PATH = '/usr/bin/chromium'
 
 [phases.install]
 cmds = ["npm ci || npm install"]

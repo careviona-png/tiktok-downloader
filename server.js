@@ -16,6 +16,13 @@ const audioModRouter = require('./routes/audioMod');
 const convertRouter = require('./routes/convert');
 const captionRouter = require('./routes/caption');
 const subtitleRouter = require('./routes/subtitle');
+const schedulerRouter = require('./routes/scheduler');
+const tiktokAuthRouter = require('./routes/tiktok-auth');
+const tiktokFeedRouter = require('./routes/tiktok-feed');
+const libraryRouter = require('./routes/library');
+const trackingRouter = require('./routes/tracking');
+const dashboardApiRouter = require('./routes/dashboard-api');
+const affiliateRouter = require('./routes/affiliate');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -79,6 +86,28 @@ app.use('/api/audio-mod', audioModRouter);
 app.use('/api/convert', convertRouter);
 app.use('/api/caption', captionRouter);
 app.use('/api/subtitle', subtitleRouter);
+app.use('/api/scheduler', schedulerRouter);
+app.use('/api/tiktok', tiktokAuthRouter);
+app.use('/api/tiktok', tiktokFeedRouter); // Merges routes under /api/tiktok
+app.use('/api/library', libraryRouter);
+app.use('/r', trackingRouter); // Short link for redirect tracking
+app.use('/api/dashboard', dashboardApiRouter); // APIs for Mod 5, 7, 8
+app.use('/api/affiliate', affiliateRouter);
+app.use('/api/dashboard', require('./routes/dashboard-api'));
+app.use('/api', require('./routes/dashboard-api')); // For /api/settings convenience
+
+// Stock Media Search API
+const stockService = require('./services/stock-service');
+app.get('/api/stock/search', async (req, res) => {
+  try {
+    const query = req.query.q || 'product';
+    const videos = await stockService.searchVideos(query, 3);
+    const images = await stockService.searchImages(query, 3);
+    res.json({ success: true, data: [...videos, ...images] });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 // TikTok to MP3 SEO landing page
 app.get('/convert-tiktok-to-mp3', (req, res) => {
@@ -140,8 +169,25 @@ app.get('/cat-video-online', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'cat-video-online.html'));
 });
 
+// MMO Tool Interface (New)
+app.get('/tool', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'tiktok-tool.html'));
+});
+
+// TikTok Scheduler Dashboard
+app.get('/scheduler', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'scheduler.html'));
+});
+
+// Affiliate Dashboard (New)
+app.get('/affiliate-dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'affiliate-dashboard.html'));
+});
+
 // Serve static frontend files AFTER specific routes
 app.use(express.static(path.join(__dirname, 'public')));
+// Serve Temp for Draft Images (DEV ONLY - Safe for local tool)
+app.use('/temp', express.static(path.join(__dirname, 'temp')));
 
 // Homepage route
 app.get('/', (req, res) => {

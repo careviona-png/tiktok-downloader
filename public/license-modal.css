@@ -1,0 +1,446 @@
+/* ========================================
+   License Key Modal Styles
+   ======================================== */
+
+/* Modal Overlay */
+.license-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    box-sizing: border-box;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.license-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Modal Container */
+.license-modal {
+    background: var(--card-bg, rgba(255, 255, 255, 0.95));
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    max-width: 440px;
+    width: 100%;
+    padding: 2.5rem;
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.license-modal-overlay.active .license-modal {
+    transform: scale(1) translateY(0);
+}
+
+/* Modal Decorative Background */
+.license-modal::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 107, 157, 0.1) 0%, rgba(200, 113, 255, 0.1) 100%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* Modal Header */
+.license-modal-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+.license-modal-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #FF6B9D 0%, #C871FF 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 10px 30px rgba(255, 107, 157, 0.4);
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 10px 30px rgba(255, 107, 157, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 10px 40px rgba(200, 113, 255, 0.6);
+    }
+}
+
+.license-modal-icon svg {
+    width: 40px;
+    height: 40px;
+    color: white;
+}
+
+.license-modal-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 0 0 0.5rem;
+    background: linear-gradient(135deg, #FF6B9D 0%, #C871FF 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.license-modal-subtitle {
+    font-size: 1rem;
+    color: var(--text-secondary, #64748b);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Trial Info Badge */
+.license-trial-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.license-trial-badge.expired {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.license-trial-badge svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Form Styles */
+.license-form {
+    position: relative;
+    z-index: 1;
+}
+
+.license-form-group {
+    margin-bottom: 1.25rem;
+}
+
+.license-form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary, #1e293b);
+    margin-bottom: 0.5rem;
+}
+
+.license-form-input {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 2px solid var(--input-border, #e2e8f0);
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    background: var(--input-bg, white);
+    color: var(--text-primary, #1e293b);
+    outline: none;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.license-form-input:focus {
+    border-color: #C871FF;
+    box-shadow: 0 0 0 4px rgba(200, 113, 255, 0.15);
+}
+
+.license-form-input::placeholder {
+    color: var(--text-secondary, #94a3b8);
+}
+
+/* Key Input with Icon */
+.license-key-input-wrapper {
+    position: relative;
+}
+
+.license-key-input-wrapper .license-form-input {
+    padding-left: 3rem;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.license-key-input-wrapper svg {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: var(--text-secondary, #94a3b8);
+}
+
+/* Username Input with @ prefix */
+.license-username-input-wrapper {
+    position: relative;
+}
+
+.license-username-input-wrapper .license-form-input {
+    padding-left: 2.5rem;
+}
+
+.license-username-input-wrapper::before {
+    content: '@';
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary, #94a3b8);
+}
+
+/* Submit Button */
+.license-submit-btn {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #FF6B9D 0%, #C871FF 100%);
+    color: white;
+    border: none;
+    border-radius: 0.75rem;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.license-submit-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.license-submit-btn:hover::before {
+    left: 100%;
+}
+
+.license-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(255, 107, 157, 0.35);
+}
+
+.license-submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.license-submit-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Loading Spinner */
+.license-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Message States */
+.license-message {
+    padding: 0.875rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.license-message svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.license-message-error {
+    background: #FEF2F2;
+    color: #DC2626;
+    border: 1px solid #FECACA;
+}
+
+.license-message-success {
+    background: #ECFDF5;
+    color: #059669;
+    border: 1px solid #A7F3D0;
+}
+
+.license-message-info {
+    background: #EFF6FF;
+    color: #2563EB;
+    border: 1px solid #BFDBFE;
+}
+
+/* Footer Links */
+.license-modal-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--input-border, #e2e8f0);
+}
+
+.license-modal-footer p {
+    font-size: 0.85rem;
+    color: var(--text-secondary, #64748b);
+    margin: 0;
+}
+
+.license-modal-footer a {
+    color: #C871FF;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.license-modal-footer a:hover {
+    color: #FF6B9D;
+}
+
+/* Skip Trial Button (optional) */
+.license-skip-btn {
+    background: transparent;
+    border: 2px solid var(--input-border, #e2e8f0);
+    color: var(--text-secondary, #64748b);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 0.75rem;
+    width: 100%;
+}
+
+.license-skip-btn:hover {
+    border-color: var(--text-secondary);
+    color: var(--text-primary);
+}
+
+/* Dark Mode Support */
+[data-theme="dark"] .license-modal {
+    background: rgba(30, 41, 59, 0.98);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .license-modal-overlay {
+    background: rgba(0, 0, 0, 0.85);
+}
+
+[data-theme="dark"] .license-form-input {
+    background: #1e293b;
+    border-color: #334155;
+    color: #f1f5f9;
+}
+
+[data-theme="dark"] .license-form-input:focus {
+    border-color: #C871FF;
+}
+
+[data-theme="dark"] .license-modal-footer {
+    border-color: #334155;
+}
+
+[data-theme="dark"] .license-message-error {
+    background: rgba(220, 38, 38, 0.1);
+    border-color: rgba(220, 38, 38, 0.3);
+}
+
+[data-theme="dark"] .license-message-success {
+    background: rgba(5, 150, 105, 0.1);
+    border-color: rgba(5, 150, 105, 0.3);
+}
+
+[data-theme="dark"] .license-message-info {
+    background: rgba(37, 99, 235, 0.1);
+    border-color: rgba(37, 99, 235, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .license-modal {
+        padding: 1.75rem;
+        border-radius: 1.25rem;
+        margin: 0.5rem;
+    }
+
+    .license-modal-title {
+        font-size: 1.5rem;
+    }
+
+    .license-modal-icon {
+        width: 64px;
+        height: 64px;
+    }
+
+    .license-modal-icon svg {
+        width: 32px;
+        height: 32px;
+    }
+}

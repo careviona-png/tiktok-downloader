@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikDown MMO Tool</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Tool Specific Styles */
+        body {
+            overflow: hidden;
+            /* App-like feel */
+        }
+
+        .tool-container {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            /* Fixed Feed, Flexible Tools */
+            height: 100vh;
+            background: var(--bg-color);
+        }
+
+        /* --- LEFT: FEED COLUMN --- */
+        .feed-column {
+            background: #000;
+            height: 100%;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            position: relative;
+            scrollbar-width: none;
+        }
+
+        .feed-column::-webkit-scrollbar {
+            display: none;
+        }
+
+        .feed-item {
+            height: 100vh;
+            width: 100%;
+            scroll-snap-align: start;
+            position: relative;
+            background: #121212;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-player {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .feed-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            color: white;
+            z-index: 10;
+        }
+
+        .feed-author {
+            font-weight: 700;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feed-desc {
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .feed-actions {
+            position: absolute;
+            right: 10px;
+            bottom: 100px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 20;
+        }
+
+        .action-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(5px);
+            border: none;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .action-label {
+            font-size: 10px;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        /* --- RIGHT: TOOLS PANEL --- */
+        .tools-panel {
+            background: var(--bg-color);
+            border-left: 1px solid var(--input-border);
+            display: grid;
+            grid-template-rows: auto 1fr;
+            height: 100%;
+        }
+
+        .tools-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--input-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tools-tabs {
+            display: flex;
+            gap: 1rem;
+            padding: 0 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .tool-tab {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            background: var(--input-bg);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .tool-tab.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .tools-content {
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        /* Library Grid */
+        .library-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1rem;
+        }
+
+        .lib-item {
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            aspect-ratio: 9/16;
+            cursor: pointer;
+            border: 1px solid var(--input-border);
+        }
+
+        .lib-thumb {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .lib-actions {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: space-around;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="tool-container">
+        <!-- FEED SECTION -->
+        <div class="feed-column" id="feedScroll">
+            <!-- Feed Items Injected Here -->
+            <div class="feed-item" style="background: #222;">
+                <div class="feed-overlay">
+                    <h3>Đang tải Feed...</h3>
+                    <p>Kết nối tới TikTok Real Service...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOOLS SECTION -->
+        <div class="tools-panel">
+            <div class="tools-header">
+                <h2>MMO Dashboard</h2>
+                <div class="user-badge" id="userBadge">Guest</div>
+            </div>
+
+            <div class="tools-tabs">
+                <div class="tool-tab active" onclick="switchTab('library')">Library</div>
+                <div class="tool-tab" onclick="switchTab('warming')">Warming</div>
+                <div class="tool-tab" onclick="switchTab('logs')">Logs</div>
+            </div>
+
+            <div class="tools-content" id="tabContent">
+                <!-- Dynamic Content -->
+            </div>
+        </div>
+    </div>
+
+    <script src="license.js"></script>
+    <script>
+        const userId = localStorage.getItem('tikdown_user_id') || 'guest';
+        document.getElementById('userBadge').textContent = userId.substring(0, 8);
+        let feedObserver;
+
+        // --- 1. FEED LOGIC ---
+        async function loadFeed() {
+            try {
+                const res = await fetch(`/api/tiktok/feed?userId=${userId}&count=5`);
+                const data = await res.json();
+
+                if (data.success && data.items.length > 0) {
+                    // Clear placeholder if first load
+                    const container = document.getElementById('feedScroll');
+                    if (container.children[0].innerText.includes('Đang tải')) container.innerHTML = '';
+
+                    data.items.forEach(renderFeedItem);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderFeedItem(item) {
+            const container = document.getElementById('feedScroll');
+
+            const div = document.createElement('div');
+            div.className = 'feed-item';
+            div.innerHTML = `
+            <video class="video-player" loop muted playsinline poster="${item.video.cover}">
+                <source src="/api/tiktok/proxy/video?url=${encodeURIComponent(item.video.url)}" type="video/mp4">
+            </video>
+            
+            <div class="feed-actions">
+                <button class="action-btn" onclick="saveToLibrary('${item.video.url}')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    <span class="action-label">Save</span>
+                </button>
+                <button class="action-btn">
+                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                     <span class="action-label">Download</span>
+                </button>
+            </div>
+
+            <div class="feed-overlay">
+                <div class="feed-author">
+                    <img src="${item.author.avatar}" style="width:30px;height:30px;border-radius:50%">
+                    ${item.author.uniqueId}
+                </div>
+                <div class="feed-desc">${item.desc}</div>
+            </div>
+        `;
+
+            container.appendChild(div);
+
+            // Auto-play observer
+            if (!feedObserver) setupObserver();
+            feedObserver.observe(div);
+        }
+
+        function setupObserver() {
+            feedObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const video = entry.target.querySelector('video');
+                    if (entry.isIntersecting) {
+                        video.play().catch(e => console.log('Autoplay blocked', e));
+                        video.muted = false;
+                    } else {
+                        video.pause();
+                    }
+                });
+            }, { threshold: 0.6 });
+        }
+
+        // --- 2. LIBRARY LOGIC ---
+        async function saveToLibrary(url) {
+            if (!confirm('Lưu video này vào thư viện?')) return;
+
+            try {
+                const res = await fetch('/api/library/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, url })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Đã lưu thành công!');
+                    if (currentTab === 'library') loadLibrary();
+                } else {
+                    alert(data.error);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadLibrary() {
+            const container = document.getElementById('tabContent');
+            container.innerHTML = '<div class="library-grid" id="libGrid"></div>';
+            const grid = document.getElementById('libGrid');
+
+            const res = await fetch(`/api/library/list?userId=${userId}`);
+            const data = await res.json();
+
+            if (data.items) {
+                data.items.forEach(item => {
+                    const el = document.createElement('div');
+                    el.className = 'lib-item';
+                    el.innerHTML = `
+                    <img class="lib-thumb" src="${item.cover}">
+                    <div class="lib-actions">
+                        <button onclick="scheduleVideo('${item.url}')" style="color:white;background:none;border:none;cursor:pointer">📅 Schedule</button>
+                    </div>
+                `;
+                    grid.appendChild(el);
+                });
+            }
+        }
+
+        // --- TABS ---
+        let currentTab = 'library';
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tool-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.tool-tab[onclick="switchTab('${tab}')"]`).classList.add('active');
+
+            if (tab === 'library') loadLibrary();
+            else document.getElementById('tabContent').innerHTML = `<h3>${tab} feature coming soon...</h3>`;
+        }
+
+        // Init
+        loadFeed();
+        switchTab('library');
+
+    </script>
+</body>
+
+</html>

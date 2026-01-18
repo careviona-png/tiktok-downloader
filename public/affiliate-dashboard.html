@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Tự Động Hóa Affiliate AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="affiliate-styles.css">
+    <!-- Reusing existing styles + new ones -->
+    <style>
+        :root {
+            --primary: #FE2C55;
+            --dark: #121212;
+            --surface: #1E1E1E;
+            --text: #ffffff;
+            --text-sec: #A0A0A0;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #333;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #444;
+            background: #2A2A2A;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .video-item {
+            background: #252525;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-preview {
+            width: 100%;
+            aspect-ratio: 9/16;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-info {
+            padding: 1rem;
+        }
+
+        .video-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge-a {
+            background: #007bff;
+            color: white;
+        }
+
+        .badge-b {
+            background: #28a745;
+            color: white;
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #555;
+            padding: 0.5rem 1rem;
+            flex: 1;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-sec);
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <div>
+                <h1>Affiliate AI Studio</h1>
+                <p style="color: var(--text-sec);">Tự động tạo video affiliate TikTok/Shorts chuẩn SEO & Chính Sách</p>
+            </div>
+            <nav style="display: flex; gap: 1rem;">
+                <button onclick="switchTab('campaign')" class="btn-outline active-tab">🎬 Chiến Dịch</button>
+                <button onclick="switchTab('analytics')" class="btn-outline">📊 Thống Kê</button>
+                <button onclick="switchTab('settings')" class="btn-outline">⚙️ Cài Đặt</button>
+            </nav>
+        </header>
+
+        <!-- Tab: Campaign -->
+        <div id="tab-campaign">
+            <section class="card">
+                <h2>🚀 Tạo Chiến Dịch Mới</h2>
+                <div class="input-group">
+                    <input type="text" id="shopeeUrl"
+                        placeholder="Dán link sản phẩm Shopee (Ví dụ: https://shopee.vn/product/...)">
+                    <button id="generateBtn" onclick="startGeneration()">
+                        ⚡ Phân Tích & Tạo
+                    </button>
+                </div>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <label>
+                        <input type="checkbox" id="generateVariants" checked> Tạo 2 biến thể (A/B Testing)
+                    </label>
+                    <span style="color: #666;">|</span>
+                    <span id="statusText" style="color: var(--primary);"></span>
+                </div>
+            </section>
+
+            <section>
+                <h2>Video Đã Tạo Gần Đây</h2>
+                <div class="video-grid" id="videoList"></div>
+            </section>
+        </div>
+
+        <!-- Tab: Analytics -->
+        <div id="tab-analytics" style="display: none;">
+            <section class="card">
+                <h2>📊 Hiệu Suất Chiến Dịch (A/B Testing)</h2>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <canvas id="abChart"></canvas>
+                    </div>
+                    <div>
+                        <h3>Hoạt Động Gần Đây</h3>
+                        <table style="width: 100%; text-align: left; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid #444;">
+                                    <th style="padding: 0.5rem;">Thời gian</th>
+                                    <th>Variant</th>
+                                    <th>Video ID</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentClicksBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Tab: Settings -->
+        <div id="tab-settings" style="display: none;">
+            <section class="card">
+                <h2>⚙️ Cấu Hình Tuân Thủ (Compliance)</h2>
+                <div style="margin-bottom: 1rem;">
+                    <label>Watermark Text (Thương hiệu)</label>
+                    <input type="text" id="setWatermark" placeholder="TikDown Auto">
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label>
+                        <input type="checkbox" id="setShowDisclosure"> Hiển thị dòng miễn trừ trách nhiệm (Bắt buộc)
+                    </label>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                    <label>Nội dung miễn trừ</label>
+                    <textarea id="setDisclosure" rows="3"
+                        style="width: 100%; background: #2A2A2A; border: 1px solid #444; color: white; padding: 0.5rem;"></textarea>
+                </div>
+
+                <hr style="border-color: #444; margin: 1.5rem 0;">
+                <h3 style="margin-bottom: 1rem;">🔑 API Keys (Cho AI Video)</h3>
+
+                <div style="margin-bottom: 1rem;">
+                    <label>Runway API Key <a href="https://app.runwayml.com/settings/api-keys" target="_blank"
+                            style="color: #667eea; font-size: 0.85rem;">(Lấy key tại đây)</a></label>
+                    <input type="password" id="setRunwayKey" placeholder="rw_xxxxxxxxxxxxxxxx" style="width: 100%;">
+                    <p style="font-size: 0.75rem; color: #888; margin-top: 0.3rem;">Chi phí: ~$0.05-0.10 / 5 giây video
+                    </p>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <label>Pexels API Key <a href="https://www.pexels.com/api/" target="_blank"
+                            style="color: #667eea; font-size: 0.85rem;">(Miễn phí)</a></label>
+                    <input type="password" id="setPexelsKey" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxx"
+                        style="width: 100%;">
+                    <p style="font-size: 0.75rem; color: #888; margin-top: 0.3rem;">Để tự động tìm stock video/ảnh chất
+                        lượng cao</p>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <label>Veed.io API Key <a href="https://www.veed.io/tools/text-to-video-api" target="_blank"
+                            style="color: #667eea; font-size: 0.85rem;">(fal.ai)</a></label>
+                    <input type="password" id="setVeedKey" placeholder="fal_xxxxxxxxxxxxxxxx" style="width: 100%;">
+                    <p style="font-size: 0.75rem; color: #888; margin-top: 0.3rem;">Tạo video "nói chuyện" (lip-sync) từ
+                        ảnh + audio</p>
+                </div>
+
+                <button onclick="saveSettings()">💾 Lưu Cài Đặt</button>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Preview Modal -->
+    <div id="previewModal" class="modal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; overflow-y: auto;">
+        <div class="modal-content"
+            style="background: #1E1E1E; margin: 5% auto; padding: 2rem; width: 80%; max-width: 800px; border-radius: 12px; border: 1px solid #333;">
+            <h2 style="margin-top: 0;">📝 Xem Trước & Chỉnh Sửa</h2>
+
+            <div id="draftLoading" style="display: none; text-align: center; padding: 2rem;">
+                <div class="spinner"></div>
+                <p>Đang phân tích dữ liệu...</p>
+            </div>
+
+            <div id="draftContent" style="display: none;">
+                <input type="hidden" id="draftId">
+
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: #A0A0A0;">Tiêu đề sản phẩm</label>
+                    <input type="text" id="draftTitle"
+                        style="width: 100%; padding: 0.5rem; background: #2A2A2A; border: 1px solid #444; color: white;"
+                        readonly>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <label>Auto-Template (Hiệu ứng động):</label>
+                        <select id="videoTemplate"
+                            style="width: 100%; padding: 0.5rem; background: #333; color: white; border: 1px solid #555;">
+                            <option value="auto" selected>✨ Tự động chọn (Random)</option>
+                            <option value="minimal_zoom">1. Minimal Zoom (Mặc định)</option>
+                            <option value="dynamic_slide">2. Dynamic Slide (Sôi động)</option>
+                            <option value="fade_smooth">3. Fade Smooth (Nhẹ nhàng)</option>
+                            <option value="flash_sale">4. Flash Sale (Nhanh & Gắt)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Auto-Music (Nhạc nền):</label>
+                        <select id="backgroundMusic"
+                            style="width: 100%; padding: 0.5rem; background: #333; color: white; border: 1px solid #555;">
+                            <option value="auto" selected>✨ Tự động chọn (Random)</option>
+                            <option value="none">Không dùng nhạc</option>
+                            <option value="upbeat_pop">Upbeat Pop (Quảng cáo)</option>
+                            <option value="chill_lofi">Chill Lofi (Review)</option>
+                            <option value="energetic_rock">Energetic Rock (Sale)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <label style="display: block; margin-bottom: 0.5rem; color: #A0A0A0;">Kịch bản Video (Có thể
+                            chỉnh sửa)</label>
+                        <textarea id="draftScript" rows="10"
+                            style="width: 100%; padding: 0.8rem; background: #2A2A2A; border: 1px solid #444; color: white; line-height: 1.5; font-family: inherit;"></textarea>
+                    </div>
+                    <div>
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <label style="display: block; color: #A0A0A0;">Chọn Hình Ảnh/Video (Bỏ tick để ẩn)</label>
+                            <button onclick="document.getElementById('manualUploadInput').click()"
+                                style="padding: 0.5rem 1rem; font-size: 0.85rem; background: #444;">➕ Upload</button>
+                            <input type="file" id="manualUploadInput" accept="image/*,video/*" multiple
+                                style="display: none;" onchange="handleManualUpload(this)">
+                        </div>
+
+                        <!-- Manual Add Controls -->
+                        <div style="margin-bottom: 0.5rem; display: flex; gap: 0.5rem;">
+                            <input type="text" id="manualImageUrl" placeholder="Dán URL ảnh/video..."
+                                style="flex: 1; padding: 0.5rem; background: #2A2A2A; border: 1px solid #444; color: white; font-size: 0.85rem;">
+                            <button onclick="addManualMedia()" style="padding: 0.5rem 1rem; font-size: 0.85rem;">➕
+                                Thêm</button>
+                        </div>
+                        <div style="margin-bottom: 0.5rem; display: flex; gap: 0.5rem;">
+                            <input type="text" id="stockSearchQuery"
+                                placeholder="Tìm ảnh/video stock (VD: shoes, beauty)"
+                                style="flex: 1; padding: 0.5rem; background: #2A2A2A; border: 1px solid #444; color: white; font-size: 0.85rem;">
+                            <button onclick="searchStockMedia()" style="padding: 0.5rem 1rem; font-size: 0.85rem;">🔍
+                                Tìm Pexels</button>
+                        </div>
+
+                        <div id="draftImages"
+                            style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; max-height: 300px; overflow-y: auto;">
+                            <!-- Images injected here -->
+                        </div>
+                        <p style="font-size: 0.75rem; color: #666; margin-top: 0.5rem;">💡 Nếu không có ảnh, dán URL
+                            hoặc tìm stock video để tạo video chuyên nghiệp!</p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem; flex-wrap: wrap;">
+                    <button onclick="closeModal()" style="background: transparent; border: 1px solid #555;">Hủy</button>
+                    <button id="renderBtn" onclick="confirmRender()"
+                        title="Tạo video từ nhiều ảnh + kịch bản (miễn phí)">🎬 Video Nhiều Ảnh (FFMPEG)</button>
+                    <button id="renderAiBtn" onclick="confirmRenderAI()" title="Tạo video chuyển động từ 1 ảnh (Runway)"
+                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">🤖 Runway (1
+                        Ảnh)</button>
+                    <button id="renderVeedBtn" onclick="confirmRenderVeed()"
+                        title="Tạo video người nói từ 1 ảnh (Veed/Kling)"
+                        style="background: linear-gradient(135deg, #00c853 0%, #00bfa5 100%);">🎤 Veed (1 Ảnh)</button>
+                    <a href="https://www.canva.com/create/videos/" target="_blank" style="text-decoration: none;">
+                        <button style="background: linear-gradient(135deg, #00c4cc 0%, #7d2ae8 100%);"
+                            title="Tự thiết kế thủ công trên Canva">🎨 Canva (Thủ công)</button>
+                    </a>
+                    <a href="https://www.flexclip.com/editor/" target="_blank" style="text-decoration: none;">
+                        <button style="background: linear-gradient(135deg, #FF9900 0%, #FF5500 100%);"
+                            title="Tạo video chuyên nghiệp cho CapCut">🎬 FlexClip</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="affiliate-client.js"></script>
+</body>
+
+</html>

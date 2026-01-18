@@ -59,10 +59,23 @@ function generateViralContent(topic, niche = 'trending') {
             ...HASHTAG_SETS.general.sort(() => 0.5 - Math.random()).slice(0, 2)
         ];
 
+        // Check for compliance
+        const compliance = require('../services/compliance');
+        let cleanCaption = caption.split('#')[0].trim();
+
+        const scanResult = compliance.scanText(cleanCaption);
+        if (scanResult.status === 'BLOCK') {
+            cleanCaption = "[Nội dung đã bị chặn do vi phạm chính sách]";
+        }
+
+        // Add Mandatory Disclosure
+        const disclosureText = "\n\n*Lưu ý: Link có thể là affiliate. Mình có thể nhận hoa hồng nếu bạn mua qua link, không tăng giá.*";
+
         return {
-            caption: caption.split('#')[0].trim(),
+            caption: cleanCaption,
             hashtags: [...new Set([...caption.matchAll(/#\w+/g)].map(m => m[0]).concat(selectedHashtags))].join(' '),
-            fullText: `${caption.split('#')[0].trim()} ${[...new Set([...caption.matchAll(/#\w+/g)].map(m => m[0]).concat(selectedHashtags))].join(' ')}`
+            fullText: `${cleanCaption}${disclosureText} ${[...new Set([...caption.matchAll(/#\w+/g)].map(m => m[0]).concat(selectedHashtags))].join(' ')}`,
+            compliance: scanResult
         };
     });
 

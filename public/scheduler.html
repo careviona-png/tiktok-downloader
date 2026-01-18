@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5993391850162275"
+        crossorigin="anonymous"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="TikDown Scheduler - Lên lịch đăng video TikTok thông minh với chế độ warming up tài khoản">
+    <meta name="keywords" content="tiktok scheduler, lên lịch tiktok, warming tiktok, đăng video tiktok">
+    <title>TikTok Scheduler - Lên Lịch Đăng Video | TikDown</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="license-modal.css">
+
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+    <link rel="canonical" href="https://www.tikdown.top/scheduler">
+</head>
+
+<body>
+    <div class="background-gradient"></div>
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <a href="/" class="logo">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"
+                    role="img">
+                    <title>TikDown Logo</title>
+                    <path d="M20 0L25 15L40 20L25 25L20 40L15 25L0 20L15 15L20 0Z" fill="url(#logo-gradient)" />
+                    <defs>
+                        <linearGradient id="logo-gradient" x1="0" y1="0" x2="40" y2="40">
+                            <stop offset="0%" stop-color="#FF6B9D" />
+                            <stop offset="100%" stop-color="#C871FF" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <span>TikDown</span>
+            </a>
+            <nav class="nav-links">
+                <a href="/" class="nav-backlink">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                    Trang chủ
+                </a>
+                <button id="darkModeToggle" class="dark-mode-toggle" title="Chế độ tối">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <circle cx="12" cy="12" r="5" />
+                        <path
+                            d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                    </svg>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" style="display:none">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
+                </button>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <!-- Hero Section -->
+            <div class="hero-section" style="padding-bottom: 1.5rem;">
+                <h1 class="title">
+                    <span>TikTok Warming</span>
+                    <span class="gradient-text">Scheduler</span>
+                </h1>
+                <p class="subtitle">Lên lịch đăng video thông minh - Warming up tài khoản an toàn</p>
+
+                <!-- License Status Badge -->
+                <div id="licenseStatus" class="license-status-badge"></div>
+            </div>
+
+            <!-- Dashboard Cards -->
+            <div class="scheduler-dashboard">
+                <!-- Account Card -->
+                <div class="dashboard-card" id="accountCard">
+                    <div class="dashboard-card-header">
+                        <div class="dashboard-card-icon" style="background: linear-gradient(135deg, #FF6B9D, #FF8EBD);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="dashboard-card-title">Tài khoản TikTok</h3>
+                            <p class="dashboard-card-subtitle" id="accountStatus">Chưa thiết lập</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-card-body">
+                        <div class="account-display" id="accountDisplay" style="display: none;">
+                            <span class="account-avatar">@</span>
+                            <span class="account-username" id="accountUsername"></span>
+                        </div>
+                        <button class="dashboard-btn" id="setupAccountBtn" style="margin-bottom: 0.5rem;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M12 5v14M5 12h14" />
+                            </svg>
+                            Thiết lập (Thủ công)
+                        </button>
+                        <button class="dashboard-btn primary" id="loginBrowserBtn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path
+                                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                                </path>
+                            </svg>
+                            Đăng nhập Browser (Real)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Schedules Card -->
+                <div class="dashboard-card" id="schedulesCard">
+                    <div class="dashboard-card-header">
+                        <div class="dashboard-card-icon" style="background: linear-gradient(135deg, #C871FF, #E0C3FC);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="dashboard-card-title">Lịch đăng bài</h3>
+                            <p class="dashboard-card-subtitle" id="schedulesStatus">0 bài đang chờ</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-card-body">
+                        <div class="schedules-list" id="schedulesList">
+                            <div class="empty-state">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.5">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                    <line x1="16" y1="2" x2="16" y2="6" />
+                                    <line x1="8" y1="2" x2="8" y2="6" />
+                                    <line x1="3" y1="10" x2="21" y2="10" />
+                                </svg>
+                                <p>Chưa có lịch đăng nào</p>
+                            </div>
+                        </div>
+                        <button class="dashboard-btn primary" id="addScheduleBtn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M12 5v14M5 12h14" />
+                            </svg>
+                            Thêm lịch đăng
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Activity Log Card -->
+                <div class="dashboard-card" id="logCard">
+                    <div class="dashboard-card-header">
+                        <div class="dashboard-card-icon" style="background: linear-gradient(135deg, #10b981, #34d399);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="dashboard-card-title">Nhật ký Hoạt động</h3>
+                            <p class="dashboard-card-subtitle" id="jobStatus">Đang chờ...</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-card-body">
+                        <div class="activity-log" id="activityLog"
+                            style="max-height: 200px; overflow-y: auto; font-size: 0.85rem; background: rgba(0,0,0,0.05); padding: 1rem; border-radius: 0.5rem;">
+                            <div class="log-entry">Hệ thống đã sẵn sàng...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Warming Presets Card -->
+                <div class="dashboard-card" id="presetsCard">
+                    <div class="dashboard-card-header">
+                        <div class="dashboard-card-icon" style="background: linear-gradient(135deg, #4F46E5, #818CF8);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polygon
+                                    points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="dashboard-card-title">Warming Presets</h3>
+                            <p class="dashboard-card-subtitle">Chọn chế độ warming</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-card-body">
+                        <div class="presets-grid">
+                            <button class="preset-btn" data-preset="gentle">
+                                <span class="preset-name">Nhẹ nhàng</span>
+                                <span class="preset-desc">1 bài/ngày (7 ngày đầu)</span>
+                            </button>
+                            <button class="preset-btn" data-preset="moderate">
+                                <span class="preset-name">Vừa phải</span>
+                                <span class="preset-desc">2 bài/ngày (ngày 4-7)</span>
+                            </button>
+                            <button class="preset-btn" data-preset="active">
+                                <span class="preset-name">Tích cực</span>
+                                <span class="preset-desc">3 bài/ngày (sau 1 tuần)</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enter License Key Button (always visible) -->
+            <div class="license-trigger-section">
+                <button class="license-trigger-btn" id="openLicenseModal">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+                    </svg>
+                    Nhập License Key
+                </button>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 TikDown. Tất cả quyền được bảo lưu.</p>
+            <p class="footer-links">
+                <a href="/privacy-policy.html">Privacy Policy</a> |
+                <a href="/terms-of-service.html">Terms of Service</a> |
+                <a href="/">Trang chủ</a>
+            </p>
+        </footer>
+    </div>
+
+    <style>
+        /* Scheduler Dashboard Styles */
+        .scheduler-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: var(--card-bg, rgba(255, 255, 255, 0.95));
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+        }
+
+        .dashboard-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .dashboard-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .dashboard-card-title {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary, #1e293b);
+        }
+
+        .dashboard-card-subtitle {
+            margin: 0.25rem 0 0;
+            font-size: 0.875rem;
+            color: var(--text-secondary, #64748b);
+        }
+
+        .dashboard-card-body {
+            margin-top: 1rem;
+        }
+
+        .dashboard-btn {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--input-bg, white);
+            border: 2px solid var(--input-border, #e2e8f0);
+            border-radius: 0.75rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary, #1e293b);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-btn:hover {
+            border-color: var(--primary-color, #FF6B9D);
+            color: var(--primary-color, #FF6B9D);
+        }
+
+        .dashboard-btn.primary {
+            background: linear-gradient(135deg, #FF6B9D 0%, #C871FF 100%);
+            border: none;
+            color: white;
+        }
+
+        .dashboard-btn.primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        /* Account Display */
+        .account-display {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(255, 107, 157, 0.1), rgba(200, 113, 255, 0.1));
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .account-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #FF6B9D, #C871FF);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .account-username {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-primary, #1e293b);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-secondary, #94a3b8);
+        }
+
+        .empty-state svg {
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Checklist */
+        .checklist-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--input-bg, #f8fafc);
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .checklist-item:hover {
+            background: rgba(255, 107, 157, 0.1);
+        }
+
+        .checklist-item input[type="checkbox"] {
+            display: none;
+        }
+
+        .checkmark {
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--input-border, #cbd5e1);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .checklist-item input:checked+.checkmark {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            border-color: transparent;
+        }
+
+        .checklist-item input:checked+.checkmark::after {
+            content: '✓';
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .checklist-text {
+            font-size: 0.95rem;
+            color: var(--text-primary, #1e293b);
+        }
+
+        .checklist-item input:checked~.checklist-text {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        /* Presets Grid */
+        .presets-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .preset-btn {
+            padding: 1rem;
+            background: var(--input-bg, white);
+            border: 2px solid var(--input-border, #e2e8f0);
+            border-radius: 0.75rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .preset-btn:hover {
+            border-color: #C871FF;
+            background: rgba(200, 113, 255, 0.05);
+        }
+
+        .preset-btn.active {
+            border-color: #C871FF;
+            background: linear-gradient(135deg, rgba(200, 113, 255, 0.1), rgba(255, 107, 157, 0.1));
+        }
+
+        .preset-name {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary, #1e293b);
+            margin-bottom: 0.25rem;
+        }
+
+        .preset-desc {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-secondary, #64748b);
+        }
+
+        /* License Status Badge */
+        .license-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .license-status-badge.trial {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .license-status-badge.expired {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .license-status-badge.unlocked {
+            background: linear-gradient(135deg, #C871FF 0%, #FF6B9D 100%);
+            color: white;
+        }
+
+        /* License Trigger Button */
+        .license-trigger-section {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .license-trigger-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: 2px solid var(--input-border, #e2e8f0);
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary, #64748b);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .license-trigger-btn:hover {
+            border-color: #C871FF;
+            color: #C871FF;
+        }
+
+        /* Locked State Overlay */
+        .dashboard-card.locked {
+            position: relative;
+            pointer-events: none;
+        }
+
+        .dashboard-card.locked::after {
+            content: '🔒 Cần License Key';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary, #64748b);
+            border-radius: 1rem;
+        }
+
+        [data-theme="dark"] .dashboard-card.locked::after {
+            background: rgba(30, 41, 59, 0.9);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .scheduler-dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Dark Mode */
+        [data-theme="dark"] .dashboard-card {
+            background: rgba(30, 41, 59, 0.95);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="dark"] .checklist-item {
+            background: rgba(30, 41, 59, 0.8);
+        }
+
+        [data-theme="dark"] .preset-btn {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: #334155;
+        }
+    </style>
+
+    <script src="license.js"></script>
+    <script>
+        // Scheduler Dashboard Logic
+        (function () {
+            'use strict';
+
+            const userId = localStorage.getItem('tikdown_user_id');
+            const logContainer = document.getElementById('activityLog');
+
+            // --- Real Automation Logic ---
+
+            // Login Browser Button
+            const loginBtn = document.getElementById('loginBrowserBtn');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', async () => {
+                    if (!confirm('Trình duyệt sẽ mở ra. Vui lòng đăng nhập thủ công vào TikTok.\nSau khi đăng nhập xong, hệ thống sẽ tự động lưu session.')) return;
+
+                    try {
+                        loginBtn.disabled = true;
+                        loginBtn.textContent = 'Đang mở browser...';
+
+                        const res = await fetch('/api/tiktok/login-browser', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ userId })
+                        });
+                        const data = await res.json();
+
+                        if (data.success) {
+                            addLog('Đã mở trình duyệt đăng nhập. Vui lòng thao tác trên cửa sổ mới.');
+                        } else {
+                            alert('Lỗi: ' + data.error);
+                            loginBtn.disabled = false;
+                            loginBtn.textContent = 'Đăng nhập Browser (Real)';
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        alert('Không thể kết nối tới server.');
+                    }
+                });
+            }
+
+            // Import Cookies Button
+            const importCookieBtn = document.getElementById('importCookieBtn');
+            if (importCookieBtn) {
+                importCookieBtn.addEventListener('click', async () => {
+                    const input = prompt('Dán chuỗi JSON Cookies của bạn vào đây:\n(Dùng extension "EditThisCookie" -> Export)');
+                    if (!input || !input.trim()) return;
+
+                    try {
+                        const cookies = JSON.parse(input);
+                        if (!Array.isArray(cookies)) throw new Error('Format không hợp lệ');
+
+                        const res = await fetch('/api/tiktok/import-cookies', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ userId, cookies })
+                        });
+                        const data = await res.json();
+
+                        if (data.success) {
+                            addLog('Đã nhập cookie thành công! Hệ thống đã kết nối.');
+                        } else {
+                            alert('Lỗi: ' + data.error);
+                        }
+                    } catch (e) {
+                        alert('Lỗi: Chuỗi JSON cookie không hợp lệ. Vui lòng kiểm tra lại.');
+                    }
+                });
+            }
+
+            // Presets (Warming)
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const preset = btn.dataset.preset;
+                    let duration = 10;
+                    if (preset === 'gentle') duration = 10;
+                    if (preset === 'moderate') duration = 20;
+                    if (preset === 'active') duration = 30;
+
+                    if (!confirm(`Bắt đầu quy trình warming "${preset}" (${duration} phút)?\nTrình duyệt sẽ chạy ngầm.`)) return;
+
+                    try {
+                        const res = await fetch('/api/scheduler/warmup', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ userId, duration })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            addLog(`Đã lên lịch warming: ${duration} phút`);
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                });
+            });
+
+            // Status Polling
+            setInterval(async () => {
+                if (!userId) return;
+                try {
+                    const res = await fetch(`/api/scheduler/status/${userId}`);
+                    const data = await res.json();
+                    if (data.success && data.status) {
+                        const s = data.status;
+                        document.getElementById('jobStatus').textContent = s.isProcessing
+                            ? `Đang chạy: ${s.currentJob?.type}`
+                            : 'Đang chờ...';
+
+                        // If processing, add generic log (real system would have stream)
+                        if (s.isProcessing) {
+                            // addLog(`Đang thực hiện: ${s.currentJob.type}...`);
+                        }
+                    }
+                } catch (e) { }
+            }, 5000);
+
+            function addLog(msg) {
+                const div = document.createElement('div');
+                div.className = 'log-entry';
+                div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+                logContainer.prepend(div);
+            }
+
+            // --- End Automation Logic ---
+
+            // Storage keys
+            const STORAGE = {
+                CHECKLIST: 'tikdown_checklist',
+                SCHEDULES: 'tikdown_schedules'
+            };
+
+            // Initialize dashboard
+            function init() {
+                updateLicenseStatus();
+                loadChecklist();
+                loadAccount();
+                bindEvents();
+                checkAccessAndLock();
+            }
+
+            // Update license status badge
+            function updateLicenseStatus() {
+                const badge = document.getElementById('licenseStatus');
+                const daysRemaining = window.getTrialDaysRemaining();
+                const isUnlocked = window.isFeatureUnlocked();
+
+                if (isUnlocked && localStorage.getItem('tikdown_license_key')) {
+                    badge.className = 'license-status-badge unlocked';
+                    badge.innerHTML = '✨ Premium Unlocked';
+                } else if (daysRemaining > 0) {
+                    badge.className = 'license-status-badge trial';
+                    badge.innerHTML = `⏱️ ${daysRemaining} ngày trial còn lại`;
+                } else {
+                    badge.className = 'license-status-badge expired';
+                    badge.innerHTML = '⚠️ Trial đã hết - Cần License Key';
+                }
+            }
+
+            // Check access and lock features if needed
+            function checkAccessAndLock() {
+                const isUnlocked = window.isFeatureUnlocked();
+
+                if (!isUnlocked) {
+                    // Lock schedule and preset cards
+                    document.getElementById('schedulesCard')?.classList.add('locked');
+                    document.getElementById('presetsCard')?.classList.add('locked');
+
+                    // Show modal
+                    setTimeout(() => {
+                        window.showLicenseModal();
+                    }, 500);
+                }
+            }
+
+            // Load account from storage
+            function loadAccount() {
+                const username = localStorage.getItem('tikdown_tiktok_username');
+                const display = document.getElementById('accountDisplay');
+                const usernameEl = document.getElementById('accountUsername');
+                const status = document.getElementById('accountStatus');
+                const setupBtn = document.getElementById('setupAccountBtn');
+
+                if (username) {
+                    display.style.display = 'flex';
+                    usernameEl.textContent = username.startsWith('@') ? username : '@' + username;
+                    status.textContent = 'Đã thiết lập';
+                    setupBtn.innerHTML = `
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                        Thay đổi
+                    `;
+                }
+            }
+
+            // Load checklist from storage
+            function loadChecklist() {
+                const today = new Date().toDateString();
+                const saved = JSON.parse(localStorage.getItem(STORAGE.CHECKLIST) || '{}');
+
+                // Reset if it's a new day
+                if (saved.date !== today) {
+                    localStorage.setItem(STORAGE.CHECKLIST, JSON.stringify({
+                        date: today,
+                        tasks: {}
+                    }));
+                    return;
+                }
+
+                // Restore checkbox states
+                Object.entries(saved.tasks || {}).forEach(([task, checked]) => {
+                    const checkbox = document.querySelector(`input[data-task="${task}"]`);
+                    if (checkbox) checkbox.checked = checked;
+                });
+
+                updateChecklistProgress();
+            }
+
+            // Save checklist to storage
+            function saveChecklist() {
+                const today = new Date().toDateString();
+                const tasks = {};
+
+                document.querySelectorAll('.checklist-item input').forEach(input => {
+                    tasks[input.dataset.task] = input.checked;
+                });
+
+                localStorage.setItem(STORAGE.CHECKLIST, JSON.stringify({
+                    date: today,
+                    tasks
+                }));
+
+                updateChecklistProgress();
+            }
+
+            // Update checklist progress display
+            function updateChecklistProgress() {
+                const checkboxes = document.querySelectorAll('.checklist-item input');
+                const checked = document.querySelectorAll('.checklist-item input:checked').length;
+                document.getElementById('checklistProgress').textContent = `${checked}/${checkboxes.length} hoàn thành`;
+            }
+
+            // Bind events
+            function bindEvents() {
+                // Checklist checkboxes
+                document.querySelectorAll('.checklist-item input').forEach(input => {
+                    input.addEventListener('change', saveChecklist);
+                });
+
+                // Open license modal
+                document.getElementById('openLicenseModal')?.addEventListener('click', () => {
+                    window.showLicenseModal();
+                });
+
+                // Setup account button
+                document.getElementById('setupAccountBtn')?.addEventListener('click', () => {
+                    const username = prompt('Nhập TikTok username của bạn (không cần @):');
+                    if (username && username.trim()) {
+                        localStorage.setItem('tikdown_tiktok_username', username.trim());
+                        loadAccount();
+                    }
+                });
+
+                // Add schedule button
+                document.getElementById('addScheduleBtn')?.addEventListener('click', () => {
+                    if (!window.isFeatureUnlocked()) {
+                        window.showLicenseModal();
+                        return;
+                    }
+                    alert('Tính năng thêm lịch đăng đang được phát triển!');
+                });
+
+                // Preset buttons
+                document.querySelectorAll('.preset-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        if (!window.isFeatureUnlocked()) {
+                            window.showLicenseModal();
+                            return;
+                        }
+                        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        alert(`Đã chọn preset: ${btn.querySelector('.preset-name').textContent}`);
+                    });
+                });
+
+                // Dark mode toggle
+                const darkModeToggle = document.getElementById('darkModeToggle');
+                if (darkModeToggle) {
+                    // Load saved preference
+                    const savedTheme = localStorage.getItem('theme');
+                    if (savedTheme === 'dark') {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                    }
+
+                    darkModeToggle.addEventListener('click', () => {
+                        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                        document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+                        localStorage.setItem('theme', isDark ? 'light' : 'dark');
+                    });
+                }
+            }
+
+            // Initialize on DOM ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+    </script>
+</body>
+
+</html>
