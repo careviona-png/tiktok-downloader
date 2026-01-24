@@ -9,7 +9,7 @@ async function getFacebookVideo(url) {
     try {
         console.log('[Facebook] Attempting with yt-dlp...');
         const ytdlp = new YtDlp();
-        const info = await ytdlp.getVideoInfo(url);
+        const info = await ytdlp.getInfoAsync(url);
 
         if (info && (info.url || info.formats)) {
             console.log('✅ Got Facebook video via yt-dlp');
