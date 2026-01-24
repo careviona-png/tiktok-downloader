@@ -1,6 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
-const { YTDlp } = require('ytdlp-nodejs');
+const { YtDlp } = require('ytdlp-nodejs');
 
 async function getFacebookVideo(url) {
     console.log('🔍 Fetching Facebook video info for:', url);
@@ -8,7 +8,7 @@ async function getFacebookVideo(url) {
     // Method 1: Try yt-dlp (Most reliable for server environments)
     try {
         console.log('[Facebook] Attempting with yt-dlp...');
-        const ytdlp = new YTDlp();
+        const ytdlp = new YtDlp();
         const info = await ytdlp.getVideoInfo(url);
 
         if (info && (info.url || info.formats)) {
